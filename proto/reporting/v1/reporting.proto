@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package reporting.v1;
+
+option go_package = "github.com/isapr/mini-erp/proto/reporting/v1;reportingv1";
+
+service ReportingService {
+  rpc GetAuditEvents(GetAuditEventsRequest) returns (GetAuditEventsResponse);
+  rpc GetOperationsSummary(GetOperationsSummaryRequest) returns (GetOperationsSummaryResponse);
+}
+
+message GetAuditEventsRequest {}
+message GetAuditEventsResponse {}
+message GetOperationsSummaryRequest {}
+message GetOperationsSummaryResponse {}

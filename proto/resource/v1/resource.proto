@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package resource.v1;
+
+option go_package = "github.com/isapr/mini-erp/proto/resource/v1;resourcev1";
+
+service ResourceService {
+  rpc CreateResource(CreateResourceRequest) returns (CreateResourceResponse);
+  rpc UpdateResource(UpdateResourceRequest) returns (UpdateResourceResponse);
+  rpc GetResource(GetResourceRequest) returns (GetResourceResponse);
+  rpc ValidateResource(ValidateResourceRequest) returns (ValidateResourceResponse);
+  rpc RecordStockMovement(RecordStockMovementRequest) returns (RecordStockMovementResponse);
+  rpc RecordResourceUsage(RecordResourceUsageRequest) returns (RecordResourceUsageResponse);
+  rpc GetResourceAvailability(GetResourceAvailabilityRequest) returns (GetResourceAvailabilityResponse);
+}
+
+message CreateResourceRequest {}
+message CreateResourceResponse {}
+message UpdateResourceRequest {}
+message UpdateResourceResponse {}
+message GetResourceRequest {}
+message GetResourceResponse {}
+message ValidateResourceRequest {}
+message ValidateResourceResponse {}
+message RecordStockMovementRequest {}
+message RecordStockMovementResponse {}
+message RecordResourceUsageRequest {}
+message RecordResourceUsageResponse {}
+message GetResourceAvailabilityRequest {}
+message GetResourceAvailabilityResponse {}

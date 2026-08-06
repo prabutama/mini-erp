@@ -1,0 +1,238 @@
+openapi: 3.1.0
+info:
+  title: Mini ERP API
+  version: 0.1.0
+  description: Contract-first MVP skeleton for Mini ERP.
+servers:
+  - url: /api/v1
+tags:
+  - name: Auth
+  - name: Platform
+  - name: Businesses
+  - name: Branches
+  - name: Users
+  - name: Roles
+  - name: Services
+  - name: Workflows
+  - name: Service Orders
+  - name: Resources
+  - name: Reports
+paths:
+  /auth/signup:
+    post:
+      tags: [Auth]
+      summary: Public tenant signup
+      operationId: signupTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: Tenant signed up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSessionResponse'
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSessionResponse'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh token
+      operationId: refreshToken
+      responses:
+        '200':
+          description: Refreshed
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      operationId: logout
+      responses:
+        '204':
+          description: Logged out
+  /me:
+    get:
+      tags: [Auth]
+      summary: Current authenticated user context
+      operationId: getMe
+      responses:
+        '200':
+          description: Current auth context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthContextResponse'
+  /platform/businesses:
+    get:
+      tags: [Platform]
+      summary: List platform-level tenant records
+      operationId: listPlatformBusinesses
+      responses:
+        '200':
+          description: Business list
+  /platform/businesses/{business_id}:
+    get:
+      tags: [Platform]
+      summary: Get platform-level tenant record
+      operationId: getPlatformBusiness
+      parameters:
+        - $ref: '#/components/parameters/BusinessId'
+      responses:
+        '200':
+          description: Business record
+    patch:
+      tags: [Platform]
+      summary: Update platform-level tenant status metadata
+      operationId: updatePlatformBusiness
+      parameters:
+        - $ref: '#/components/parameters/BusinessId'
+      responses:
+        '200':
+          description: Updated
+  /businesses/current:
+    get:
+      tags: [Businesses]
+      summary: Get current business
+      operationId: getCurrentBusiness
+      responses:
+        '200':
+          description: Current business
+    patch:
+      tags: [Businesses]
+      summary: Update current business
+      operationId: updateCurrentBusiness
+      responses:
+        '200':
+          description: Updated
+  /branches:
+    get:
+      tags: [Branches]
+      summary: List branches
+      operationId: listBranches
+      responses:
+        '200':
+          description: Branch list
+    post:
+      tags: [Branches]
+      summary: Create branch
+      operationId: createBranch
+      responses:
+        '201':
+          description: Branch created
+  /branches/{branch_id}:
+    get:
+      tags: [Branches]
+      summary: Get branch
+      operationId: getBranch
+      parameters:
+        - $ref: '#/components/parameters/BranchId'
+      responses:
+        '200':
+          description: Branch
+    patch:
+      tags: [Branches]
+      summary: Update branch
+      operationId: updateBranch
+      parameters:
+        - $ref: '#/components/parameters/BranchId'
+      responses:
+        '200':
+          description: Updated
+components:
+  parameters:
+    BusinessId:
+      name: business_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BranchId:
+      name: branch_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    SignupRequest:
+      type: object
+      required: [business_name, business_timezone, admin_full_name, admin_email, admin_password]
+      properties:
+        business_name:
+          type: string
+        business_timezone:
+          type: string
+        admin_full_name:
+          type: string
+        admin_email:
+          type: string
+          format: email
+        admin_password:
+          type: string
+          format: password
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthSessionResponse:
+      type: object
+      required: [access_token, refresh_token, user]
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        user:
+          $ref: '#/components/schemas/AuthContextResponse'
+    AuthContextResponse:
+      type: object
+      required: [user_id, role, permissions, request_id]
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        business_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [Platform Admin, Business Admin, Manager, Staff]
+        permissions:
+          type: array
+          items:
+            type: string
+        assigned_branch_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        request_id:
+          type: string
+          format: uuid

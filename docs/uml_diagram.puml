@@ -1,0 +1,292 @@
+@startuml
+title Microservices Database Design
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+hide methods
+hide stereotypes
+
+package "Identity Service\nidentity_db" #EAF2FF {
+
+  class User {
+    + UUID id
+    + string email
+    + string password_hash
+    + string full_name
+    + string status
+    + datetime created_at
+  }
+
+  class Role {
+    + UUID id
+    + string name
+    + string description
+    + string scope
+  }
+
+  class Permission {
+    + UUID id
+    + string code
+    + string description
+  }
+
+  class UserRole {
+    + UUID user_id
+    + UUID role_id
+    + UUID business_id nullable
+  }
+
+  class RolePermission {
+    + UUID role_id
+    + UUID permission_id
+  }
+
+  User "1" -- "0..*" UserRole
+  Role "1" -- "0..*" UserRole
+  Role "1" -- "0..*" RolePermission
+  Permission "1" -- "0..*" RolePermission
+}
+
+package "Organization Service\norganization_db" #EAF8EA {
+
+  class Business {
+    + UUID id
+    + string name
+    + string code
+    + string status
+    + string plan
+    + datetime suspended_at
+    + string timezone
+  }
+
+  class Branch {
+    + UUID id
+    + UUID business_id
+    + string name
+    + string code
+    + string address
+    + string phone
+    + string status
+  }
+
+  class EmployeePlacement {
+    + UUID id
+    + UUID user_id
+    + UUID business_id
+    + UUID branch_id
+    + string position
+    + string employment_type
+    + string status
+    + date start_date
+    + date end_date
+  }
+
+  Business "1" -- "0..*" Branch
+  Business "1" -- "0..*" EmployeePlacement
+  Branch "1" -- "0..*" EmployeePlacement
+}
+
+package "Operations Service\noperations_db" #F3ECFF {
+
+  class ServiceDefinition {
+    + UUID id
+    + UUID business_id
+    + string name
+    + string code
+    + string description
+    + int default_duration
+    + string status
+  }
+
+  class Workflow {
+    + UUID id
+    + UUID business_id
+    + UUID service_id
+    + string name
+    + string description
+    + string status
+  }
+
+  class WorkflowStatus {
+    + UUID id
+    + UUID workflow_id
+    + string name
+    + int sequence_no
+    + bool is_initial
+    + bool is_final
+  }
+
+  class WorkflowTransition {
+    + UUID id
+    + UUID workflow_id
+    + UUID from_status_id
+    + UUID to_status_id
+  }
+
+  class ServiceOrder {
+    + UUID id
+    + UUID business_id
+    + UUID branch_id
+    + UUID service_id
+    + UUID workflow_id
+    + UUID current_status_id
+    + UUID assigned_user_id
+    + string reference_number
+    + string priority
+    + string notes
+    + string status
+    + datetime created_at
+  }
+
+  class OrderHistory {
+    + UUID id
+    + UUID service_order_id
+    + UUID from_status_id
+    + UUID to_status_id
+    + UUID changed_by
+    + datetime changed_at
+    + string notes
+  }
+
+  ServiceDefinition "1" -- "0..*" Workflow
+  Workflow "1" -- "1..*" WorkflowStatus
+  Workflow "1" -- "0..*" WorkflowTransition
+
+  WorkflowStatus "1" -- "0..*" WorkflowTransition : from
+  WorkflowStatus "1" -- "0..*" WorkflowTransition : to
+
+  ServiceDefinition "1" -- "0..*" ServiceOrder
+  Workflow "1" -- "0..*" ServiceOrder
+  WorkflowStatus "1" -- "0..*" ServiceOrder : current status
+  ServiceOrder "1" -- "0..*" OrderHistory
+}
+
+package "Resource Service\nresource_db" #FFF2DF {
+
+  class Resource {
+    + UUID id
+    + UUID business_id
+    + UUID branch_id
+    + string name
+    + string type
+    + string unit_of_measure
+    + string status
+  }
+
+  class Stock {
+    + UUID id
+    + UUID resource_id
+    + decimal quantity_on_hand
+    + decimal minimum_quantity
+    + decimal maximum_quantity
+  }
+
+  class StockMovement {
+    + UUID id
+    + UUID resource_id
+    + string movement_type
+    + decimal quantity
+    + UUID reference_id
+    + string reference_type
+    + UUID performed_by
+    + datetime performed_at
+  }
+
+  class ResourceUsage {
+    + UUID id
+    + UUID service_order_id
+    + UUID resource_id
+    + decimal quantity
+    + UUID used_by
+    + datetime used_at
+  }
+
+  Resource "1" -- "0..1" Stock
+  Resource "1" -- "0..*" StockMovement
+  Resource "1" -- "0..*" ResourceUsage
+}
+
+package "Reporting Service\nreporting_db" #E8F8FA {
+
+  class AuditEvent {
+    + UUID id
+    + UUID business_id
+    + UUID actor_id
+    + string action
+    + string entity_type
+    + UUID entity_id
+    + JSON metadata
+    + datetime created_at
+  }
+
+  class ReportSnapshot {
+    + UUID id
+    + UUID business_id
+    + UUID branch_id
+    + string report_type
+    + date period_start
+    + date period_end
+    + JSON data
+    + datetime created_at
+  }
+}
+
+' Cross-service references
+User ..> EmployeePlacement : user_id reference
+User ..> ServiceOrder : assigned_user_id reference
+User ..> OrderHistory : changed_by reference
+User ..> AuditEvent : actor_id reference
+
+Business ..> ServiceDefinition : business_id reference
+Business ..> ServiceOrder : business_id reference
+Business ..> Resource : business_id reference
+Business ..> AuditEvent : business_id reference
+Business ..> ReportSnapshot : business_id reference
+
+Branch ..> ServiceOrder : branch_id reference
+Branch ..> Resource : branch_id reference
+Branch ..> ReportSnapshot : branch_id reference
+
+ServiceOrder ..> ResourceUsage : service_order_id reference
+ServiceOrder ..> StockMovement : reference_id
+
+note right of Role
+scope values:
+- platform
+- business
+end note
+
+note right of UserRole
+Platform-scoped roles use null business_id.
+Business-scoped roles use business_id UUID reference.
+end note
+
+note right of Business
+Platform Admin may manage only platform-level
+tenant metadata such as status, plan,
+and suspension state.
+end note
+
+note top
+Public tenant signup is the only tenant creation path in MVP.
+
+API Gateway signup orchestration:
+- Create Business in Organization
+- Create first Business Admin user in Identity
+- Assign first business-scoped admin role
+
+Platform Admin exists separately for platform oversight.
+Platform Admin cannot create tenants and cannot manage
+tenant branches, managers, staff, workflows,
+service orders, resources, stock, or reports.
+end note
+
+note bottom
+Solid lines represent relationships inside one service database.
+
+Dashed arrows represent cross-service UUID references.
+Cross-service references are not database foreign keys.
+Validation and synchronization use gRPC or NATS JetStream events.
+end note
+
+@enduml

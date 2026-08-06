@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package organization.v1;
+
+option go_package = "github.com/isapr/mini-erp/proto/organization/v1;organizationv1";
+
+service OrganizationService {
+  rpc CreateBusiness(CreateBusinessRequest) returns (CreateBusinessResponse);
+  rpc GetBusiness(GetBusinessRequest) returns (GetBusinessResponse);
+  rpc UpdateBusiness(UpdateBusinessRequest) returns (UpdateBusinessResponse);
+  rpc CreateBranch(CreateBranchRequest) returns (CreateBranchResponse);
+  rpc GetBranch(GetBranchRequest) returns (GetBranchResponse);
+  rpc ListBranches(ListBranchesRequest) returns (ListBranchesResponse);
+  rpc ValidateBusiness(ValidateBusinessRequest) returns (ValidateBusinessResponse);
+  rpc ValidateBranch(ValidateBranchRequest) returns (ValidateBranchResponse);
+  rpc ValidateBranchAccess(ValidateBranchAccessRequest) returns (ValidateBranchAccessResponse);
+  rpc ListAssignedBranches(ListAssignedBranchesRequest) returns (ListAssignedBranchesResponse);
+  rpc CreateEmployeePlacement(CreateEmployeePlacementRequest) returns (CreateEmployeePlacementResponse);
+  rpc ValidateEmployeePlacement(ValidateEmployeePlacementRequest) returns (ValidateEmployeePlacementResponse);
+}
+
+message CreateBusinessRequest {
+  string name = 1;
+  string timezone = 2;
+}
+
+message CreateBusinessResponse {
+  string business_id = 1;
+  string name = 2;
+  string code = 3;
+  string status = 4;
+  string plan = 5;
+  string timezone = 6;
+}
+message GetBusinessRequest {}
+message GetBusinessResponse {}
+message UpdateBusinessRequest {}
+message UpdateBusinessResponse {}
+message CreateBranchRequest {}
+message CreateBranchResponse {}
+message GetBranchRequest {}
+message GetBranchResponse {}
+message ListBranchesRequest {}
+message ListBranchesResponse {}
+message ValidateBusinessRequest {}
+message ValidateBusinessResponse {}
+message ValidateBranchRequest {}
+message ValidateBranchResponse {}
+message ValidateBranchAccessRequest {}
+message ValidateBranchAccessResponse {}
+message ListAssignedBranchesRequest {}
+message ListAssignedBranchesResponse {}
+message CreateEmployeePlacementRequest {}
+message CreateEmployeePlacementResponse {}
+message ValidateEmployeePlacementRequest {}
+message ValidateEmployeePlacementResponse {}

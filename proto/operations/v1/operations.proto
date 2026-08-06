@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package operations.v1;
+
+option go_package = "github.com/isapr/mini-erp/proto/operations/v1;operationsv1";
+
+service OperationsService {
+  rpc CreateServiceDefinition(CreateServiceDefinitionRequest) returns (CreateServiceDefinitionResponse);
+  rpc UpdateServiceDefinition(UpdateServiceDefinitionRequest) returns (UpdateServiceDefinitionResponse);
+  rpc GetServiceDefinition(GetServiceDefinitionRequest) returns (GetServiceDefinitionResponse);
+  rpc ValidateServiceDefinition(ValidateServiceDefinitionRequest) returns (ValidateServiceDefinitionResponse);
+  rpc CreateWorkflow(CreateWorkflowRequest) returns (CreateWorkflowResponse);
+  rpc UpdateWorkflow(UpdateWorkflowRequest) returns (UpdateWorkflowResponse);
+  rpc GetWorkflow(GetWorkflowRequest) returns (GetWorkflowResponse);
+  rpc AddWorkflowStatus(AddWorkflowStatusRequest) returns (AddWorkflowStatusResponse);
+  rpc AddWorkflowTransition(AddWorkflowTransitionRequest) returns (AddWorkflowTransitionResponse);
+  rpc CreateServiceOrder(CreateServiceOrderRequest) returns (CreateServiceOrderResponse);
+  rpc GetServiceOrder(GetServiceOrderRequest) returns (GetServiceOrderResponse);
+  rpc ValidateServiceOrder(ValidateServiceOrderRequest) returns (ValidateServiceOrderResponse);
+  rpc AssignServiceOrder(AssignServiceOrderRequest) returns (AssignServiceOrderResponse);
+  rpc TransitionServiceOrder(TransitionServiceOrderRequest) returns (TransitionServiceOrderResponse);
+}
+
+message CreateServiceDefinitionRequest {}
+message CreateServiceDefinitionResponse {}
+message UpdateServiceDefinitionRequest {}
+message UpdateServiceDefinitionResponse {}
+message GetServiceDefinitionRequest {}
+message GetServiceDefinitionResponse {}
+message ValidateServiceDefinitionRequest {}
+message ValidateServiceDefinitionResponse {}
+message CreateWorkflowRequest {}
+message CreateWorkflowResponse {}
+message UpdateWorkflowRequest {}
+message UpdateWorkflowResponse {}
+message GetWorkflowRequest {}
+message GetWorkflowResponse {}
+message AddWorkflowStatusRequest {}
+message AddWorkflowStatusResponse {}
+message AddWorkflowTransitionRequest {}
+message AddWorkflowTransitionResponse {}
+message CreateServiceOrderRequest {}
+message CreateServiceOrderResponse {}
+message GetServiceOrderRequest {}
+message GetServiceOrderResponse {}
+message ValidateServiceOrderRequest {}
+message ValidateServiceOrderResponse {}
+message AssignServiceOrderRequest {}
+message AssignServiceOrderResponse {}
+message TransitionServiceOrderRequest {}
+message TransitionServiceOrderResponse {}

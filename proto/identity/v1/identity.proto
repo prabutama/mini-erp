@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package identity.v1;
+
+option go_package = "github.com/isapr/mini-erp/proto/identity/v1;identityv1";
+
+service IdentityService {
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc GetUserAccessContext(GetUserAccessContextRequest) returns (GetUserAccessContextResponse);
+  rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+  rpc ValidatePlatformAdmin(ValidatePlatformAdminRequest) returns (ValidatePlatformAdminResponse);
+  rpc SignupTenantAdmin(SignupTenantAdminRequest) returns (SignupTenantAdminResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc AssignBusinessRole(AssignBusinessRoleRequest) returns (AssignBusinessRoleResponse);
+}
+
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  string user_id = 2;
+}
+
+message GetUserAccessContextRequest {
+  string access_token = 1;
+  string request_id = 2;
+}
+
+message GetUserAccessContextResponse {
+  string user_id = 1;
+  string business_id = 2;
+  string role = 3;
+  repeated string permissions = 4;
+  repeated string assigned_branch_ids = 5;
+  string request_id = 6;
+}
+message CheckPermissionRequest {}
+message CheckPermissionResponse {}
+message ValidatePlatformAdminRequest {}
+message ValidatePlatformAdminResponse {}
+message SignupTenantAdminRequest {
+  string business_id = 1;
+  string admin_email = 2;
+  string admin_password = 3;
+  string admin_full_name = 4;
+}
+
+message SignupTenantAdminResponse {
+  string user_id = 1;
+  string business_id = 2;
+  string role = 3;
+}
+message CreateUserRequest {}
+message CreateUserResponse {}
+message UpdateUserRequest {}
+message UpdateUserResponse {}
+message AssignBusinessRoleRequest {}
+message AssignBusinessRoleResponse {}
