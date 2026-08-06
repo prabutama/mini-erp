@@ -77,6 +77,13 @@ func (h *UserHandler) CreatePlacement(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return writeError(c, fiber.StatusBadRequest, "INVALID_JSON", "Invalid JSON body")
 	}
+	branch, err := h.organization.GetBranch(c.UserContext(), ports.GetBranchRequest{BranchID: req.BranchID})
+	if err != nil {
+		return mapUserError(c, err)
+	}
+	if branch.BusinessID != authContext.BusinessID {
+		return writeError(c, fiber.StatusForbidden, "FORBIDDEN", "Forbidden")
+	}
 	placement, err := h.organization.CreateEmployeePlacement(c.UserContext(), ports.CreateEmployeePlacementRequest{UserID: c.Params("user_id"), BusinessID: authContext.BusinessID, BranchID: req.BranchID, Position: req.Position, EmploymentType: req.EmploymentType})
 	if err != nil {
 		return mapUserError(c, err)

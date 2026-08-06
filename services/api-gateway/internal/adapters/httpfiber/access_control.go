@@ -45,3 +45,18 @@ func blockPlatformAdminOnTenantRoutes() fiber.Handler {
 		return c.Next()
 	}
 }
+
+func canAccessBranch(authContext domain.AuthContext, branchID string) bool {
+	if authContext.Role == domain.RoleBusinessAdmin {
+		return true
+	}
+	if authContext.Role != domain.RoleManager && authContext.Role != domain.RoleStaff {
+		return false
+	}
+	for _, assignedBranchID := range authContext.AssignedBranchIDs {
+		if assignedBranchID == branchID {
+			return true
+		}
+	}
+	return false
+}

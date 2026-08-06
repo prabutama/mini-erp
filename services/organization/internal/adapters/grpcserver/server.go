@@ -84,6 +84,16 @@ type EmployeePlacementResponse struct {
 	Status         string `json:"status"`
 }
 
+type ListAssignedBranchesRequest struct {
+	UserID     string `json:"user_id"`
+	BusinessID string `json:"business_id"`
+}
+
+type ListAssignedBranchesResponse struct {
+	BranchIDs  []string                    `json:"branch_ids"`
+	Placements []EmployeePlacementResponse `json:"placements"`
+}
+
 type Server struct {
 	businesses *application.BusinessService
 	branches   *application.BranchService
@@ -97,6 +107,7 @@ type organizationServiceServer interface {
 	ListBranches(context.Context, ListBranchesRequest) (ListBranchesResponse, error)
 	UpdateBranch(context.Context, UpdateBranchRequest) (BranchResponse, error)
 	CreateEmployeePlacement(context.Context, CreateEmployeePlacementRequest) (EmployeePlacementResponse, error)
+	ListAssignedBranches(context.Context, ListAssignedBranchesRequest) (ListAssignedBranchesResponse, error)
 }
 
 func New(businesses *application.BusinessService, branches *application.BranchService, placements *application.PlacementService) *Server {
@@ -115,6 +126,7 @@ func (s *Server) Register(grpcServer *grpc.Server) {
 			{MethodName: "ListBranches", Handler: listBranchesHandler},
 			{MethodName: "UpdateBranch", Handler: updateBranchHandler},
 			{MethodName: "CreateEmployeePlacement", Handler: createEmployeePlacementHandler},
+			{MethodName: "ListAssignedBranches", Handler: listAssignedBranchesHandler},
 		},
 	}, s)
 }
@@ -165,6 +177,14 @@ func createEmployeePlacementHandler(srv any, ctx context.Context, dec func(any) 
 		return nil, err
 	}
 	return srv.(organizationServiceServer).CreateEmployeePlacement(ctx, req)
+}
+
+func listAssignedBranchesHandler(srv any, ctx context.Context, dec func(any) error, _ grpc.UnaryServerInterceptor) (any, error) {
+	var req ListAssignedBranchesRequest
+	if err := dec(&req); err != nil {
+		return nil, err
+	}
+	return srv.(organizationServiceServer).ListAssignedBranches(ctx, req)
 }
 
 func (s *Server) CreateBusiness(ctx context.Context, req CreateBusinessRequest) (CreateBusinessResponse, error) {
@@ -243,6 +263,23 @@ func (s *Server) CreateEmployeePlacement(ctx context.Context, req CreateEmployee
 		return EmployeePlacementResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return EmployeePlacementResponse{PlacementID: placement.ID.String(), UserID: placement.UserID.String(), BusinessID: placement.BusinessID.String(), BranchID: placement.BranchID.String(), Position: placement.Position, EmploymentType: placement.EmploymentType, Status: placement.Status}, nil
+}
+
+func (s *Server) ListAssignedBranches(ctx context.Context, req ListAssignedBranchesRequest) (ListAssignedBranchesResponse, error) {
+	placements, err := s.placements.ListAssignedBranches(ctx, application.ListAssignedBranchesInput{UserID: req.UserID, BusinessID: req.BusinessID})
+	if errors.Is(err, application.ErrValidation) {
+		return ListAssignedBranchesResponse{}, status.Error(codes.InvalidArgument, "validation failed")
+	}
+	if err != nil {
+		return ListAssignedBranchesResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	response := ListAssignedBranchesResponse{BranchIDs: []string{}, Placements: []EmployeePlacementResponse{}}
+	for _, placement := range placements {
+		response.BranchIDs = append(response.BranchIDs, placement.BranchID.String())
+		response.Placements = append(response.Placements, EmployeePlacementResponse{PlacementID: placement.ID.String(), UserID: placement.UserID.String(), BusinessID: placement.BusinessID.String(), BranchID: placement.BranchID.String(), Position: placement.Position, EmploymentType: placement.EmploymentType, Status: placement.Status})
+	}
+	return response, nil
 }
 
 func branchResponse(branch domain.Branch) BranchResponse {

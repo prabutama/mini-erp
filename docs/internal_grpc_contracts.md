@@ -99,6 +99,22 @@ CreateEmployeePlacement
 ValidateEmployeePlacement
 ```
 
+`ListAssignedBranches` request:
+
+```text
+user_id
+business_id
+```
+
+`ListAssignedBranches` response:
+
+```text
+branch_ids
+placements
+```
+
+Only active placements without `end_date` count as assigned branches.
+
 ### Operations Service
 
 ```text

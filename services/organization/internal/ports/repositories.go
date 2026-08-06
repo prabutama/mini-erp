@@ -20,4 +20,5 @@ type BranchRepository interface {
 
 type PlacementRepository interface {
 	Create(ctx context.Context, placement domain.EmployeePlacement) error
+	ListAssignedBranches(ctx context.Context, userID string, businessID string) ([]domain.EmployeePlacement, error)
 }

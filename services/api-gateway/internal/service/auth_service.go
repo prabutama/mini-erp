@@ -185,7 +185,15 @@ func (s *AuthService) GetMe(ctx context.Context, accessToken string, requestID s
 		if err != nil {
 			return domain.AuthContext{}, err
 		}
-		return domain.AuthContext{UserID: resp.UserID, BusinessID: resp.BusinessID, Role: domain.Role(resp.Role), Permissions: resp.Permissions, AssignedBranchIDs: resp.AssignedBranchIDs, RequestID: resp.RequestID}, nil
+		authContext := domain.AuthContext{UserID: resp.UserID, BusinessID: resp.BusinessID, Role: domain.Role(resp.Role), Permissions: resp.Permissions, AssignedBranchIDs: resp.AssignedBranchIDs, RequestID: resp.RequestID}
+		if s.organization != nil && authContext.BusinessID != "" && (authContext.Role == domain.RoleManager || authContext.Role == domain.RoleStaff) {
+			assigned, err := s.organization.ListAssignedBranches(ctx, ports.ListAssignedBranchesRequest{UserID: authContext.UserID, BusinessID: authContext.BusinessID})
+			if err != nil {
+				return domain.AuthContext{}, err
+			}
+			authContext.AssignedBranchIDs = assigned.BranchIDs
+		}
+		return authContext, nil
 	}
 
 	s.mu.RLock()

@@ -12,6 +12,7 @@ type BranchClient interface {
 	ListBranches(ctx context.Context, req ListBranchesRequest) (domain.ListBranchesResponse, error)
 	UpdateBranch(ctx context.Context, req UpdateBranchRequest) (domain.BranchResponse, error)
 	CreateEmployeePlacement(ctx context.Context, req CreateEmployeePlacementRequest) (domain.PlacementResponse, error)
+	ListAssignedBranches(ctx context.Context, req ListAssignedBranchesRequest) (ListAssignedBranchesResponse, error)
 }
 
 type CreateBranchRequest struct {

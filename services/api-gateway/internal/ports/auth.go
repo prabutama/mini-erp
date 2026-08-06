@@ -16,6 +16,7 @@ type AuthService interface {
 
 type OrganizationClient interface {
 	CreateBusiness(ctx context.Context, req CreateBusinessRequest) (CreateBusinessResponse, error)
+	ListAssignedBranches(ctx context.Context, req ListAssignedBranchesRequest) (ListAssignedBranchesResponse, error)
 }
 
 type IdentityClient interface {
@@ -108,4 +109,14 @@ type AssignBusinessRoleRequest struct {
 	UserID     string `json:"user_id"`
 	BusinessID string `json:"business_id"`
 	Role       string `json:"role"`
+}
+
+type ListAssignedBranchesRequest struct {
+	UserID     string `json:"user_id"`
+	BusinessID string `json:"business_id"`
+}
+
+type ListAssignedBranchesResponse struct {
+	BranchIDs  []string                   `json:"branch_ids"`
+	Placements []domain.PlacementResponse `json:"placements"`
 }

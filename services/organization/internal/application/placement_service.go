@@ -18,6 +18,11 @@ type CreatePlacementInput struct {
 	EmploymentType string
 }
 
+type ListAssignedBranchesInput struct {
+	UserID     string
+	BusinessID string
+}
+
 type PlacementService struct {
 	placements ports.PlacementRepository
 }
@@ -47,4 +52,14 @@ func (s *PlacementService) CreatePlacement(ctx context.Context, input CreatePlac
 		return domain.EmployeePlacement{}, err
 	}
 	return placement, nil
+}
+
+func (s *PlacementService) ListAssignedBranches(ctx context.Context, input ListAssignedBranchesInput) ([]domain.EmployeePlacement, error) {
+	if _, err := uuid.Parse(input.UserID); err != nil {
+		return nil, ErrValidation
+	}
+	if _, err := uuid.Parse(input.BusinessID); err != nil {
+		return nil, ErrValidation
+	}
+	return s.placements.ListAssignedBranches(ctx, input.UserID, input.BusinessID)
 }

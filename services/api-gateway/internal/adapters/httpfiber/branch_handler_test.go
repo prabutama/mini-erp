@@ -24,7 +24,7 @@ func (branchClientStub) GetBranch(_ context.Context, req ports.GetBranchRequest)
 }
 
 func (branchClientStub) ListBranches(_ context.Context, _ ports.ListBranchesRequest) (domain.ListBranchesResponse, error) {
-	return domain.ListBranchesResponse{Branches: []domain.BranchResponse{{BranchID: "branch-1", BusinessID: "business-1", Name: "Main", Code: "main", Status: "active"}}}, nil
+	return domain.ListBranchesResponse{Branches: []domain.BranchResponse{{BranchID: "branch-1", BusinessID: "business-1", Name: "Main", Code: "main", Status: "active"}, {BranchID: "branch-2", BusinessID: "business-1", Name: "Second", Code: "second", Status: "active"}}}, nil
 }
 
 func (branchClientStub) UpdateBranch(_ context.Context, req ports.UpdateBranchRequest) (domain.BranchResponse, error) {
@@ -33,6 +33,10 @@ func (branchClientStub) UpdateBranch(_ context.Context, req ports.UpdateBranchRe
 
 func (branchClientStub) CreateEmployeePlacement(_ context.Context, req ports.CreateEmployeePlacementRequest) (domain.PlacementResponse, error) {
 	return domain.PlacementResponse{PlacementID: "placement-1", UserID: req.UserID, BusinessID: req.BusinessID, BranchID: req.BranchID, Position: req.Position, EmploymentType: req.EmploymentType, Status: "active"}, nil
+}
+
+func (branchClientStub) ListAssignedBranches(_ context.Context, req ports.ListAssignedBranchesRequest) (ports.ListAssignedBranchesResponse, error) {
+	return ports.ListAssignedBranchesResponse{BranchIDs: []string{"branch-1"}, Placements: []domain.PlacementResponse{{PlacementID: "placement-1", UserID: req.UserID, BusinessID: req.BusinessID, BranchID: "branch-1", Status: "active"}}}, nil
 }
 
 func TestCreateBranch(t *testing.T) {

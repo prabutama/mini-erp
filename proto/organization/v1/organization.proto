@@ -48,8 +48,25 @@ message ValidateBranchRequest {}
 message ValidateBranchResponse {}
 message ValidateBranchAccessRequest {}
 message ValidateBranchAccessResponse {}
-message ListAssignedBranchesRequest {}
-message ListAssignedBranchesResponse {}
+message ListAssignedBranchesRequest {
+  string user_id = 1;
+  string business_id = 2;
+}
+
+message ListAssignedBranchesResponse {
+  repeated string branch_ids = 1;
+  repeated EmployeePlacement placements = 2;
+}
+
+message EmployeePlacement {
+  string placement_id = 1;
+  string user_id = 2;
+  string business_id = 3;
+  string branch_id = 4;
+  string position = 5;
+  string employment_type = 6;
+  string status = 7;
+}
 message CreateEmployeePlacementRequest {}
 message CreateEmployeePlacementResponse {}
 message ValidateEmployeePlacementRequest {}

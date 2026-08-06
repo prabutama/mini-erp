@@ -44,6 +44,12 @@ func (c *OrganizationClient) CreateEmployeePlacement(ctx context.Context, req po
 	return resp, err
 }
 
+func (c *OrganizationClient) ListAssignedBranches(ctx context.Context, req ports.ListAssignedBranchesRequest) (ports.ListAssignedBranchesResponse, error) {
+	var resp ports.ListAssignedBranchesResponse
+	err := c.conn.Invoke(ctx, "/organization.v1.OrganizationService/ListAssignedBranches", req, &resp)
+	return resp, err
+}
+
 func NewOrganizationClient(ctx context.Context, addr string) (*OrganizationClient, error) {
 	encoding.RegisterCodec(jsonCodec{})
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithDefaultCallOptions(grpc.ForceCodec(jsonCodec{})))

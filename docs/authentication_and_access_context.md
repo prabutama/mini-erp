@@ -9,6 +9,11 @@ For business-scoped users, the system also resolves:
 business_id
 assigned_branch_ids
 
+Resolution flow:
+Identity validates the access token and returns `user_id`, role, permissions, `business_id`, and request context.
+For `Manager` and `Staff`, API Gateway calls Organization `ListAssignedBranches` to load `assigned_branch_ids` from active employee placements.
+`Business Admin` is tenant-wide for branch and user management in MVP.
+
 Rules:
 Every request must include the authenticated context.
 Platform Admin actions are platform-scoped, not business-scoped.
@@ -17,6 +22,8 @@ Managers and Staff can access only assigned branches.
 The API Gateway validates access before calling internal services.
 Internal services must also revalidate critical permissions through the Identity or Organization Service.
 Never trust business_id or branch_id sent directly by the frontend.
+Branch route access uses authenticated context, not frontend-provided business scope.
+Managers and Staff receive filtered branch lists and can only read assigned branches.
 Public tenant signup is allowed only through `/api/v1/auth/signup`.
 Signup is the only unauthenticated flow allowed to create a new `business_id`.
 Business users cannot create or switch businesses.

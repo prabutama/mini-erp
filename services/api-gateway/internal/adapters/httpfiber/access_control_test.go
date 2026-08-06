@@ -12,8 +12,9 @@ import (
 )
 
 type authServiceStub struct {
-	role       domain.Role
-	businessID string
+	role              domain.Role
+	businessID        string
+	assignedBranchIDs []string
 }
 
 func (s authServiceStub) Signup(context.Context, domain.SignupRequest, string) (domain.AuthSession, error) {
@@ -29,7 +30,7 @@ func (s authServiceStub) Refresh(context.Context, string, string) (domain.AuthSe
 }
 
 func (s authServiceStub) GetMe(context.Context, string, string) (domain.AuthContext, error) {
-	return domain.AuthContext{UserID: "user-1", BusinessID: s.businessID, Role: s.role, Permissions: []string{}, RequestID: "request-1"}, nil
+	return domain.AuthContext{UserID: "user-1", BusinessID: s.businessID, Role: s.role, Permissions: []string{}, AssignedBranchIDs: s.assignedBranchIDs, RequestID: "request-1"}, nil
 }
 
 func (s authServiceStub) Logout(context.Context, string) error {
@@ -68,6 +69,10 @@ func (identityClientStubForHTTP) UpdateUser(context.Context, ports.UpdateUserReq
 
 func (identityClientStubForHTTP) AssignBusinessRole(context.Context, ports.AssignBusinessRoleRequest) error {
 	return nil
+}
+
+func (identityClientStubForHTTP) ListAssignedBranches(context.Context, ports.ListAssignedBranchesRequest) (ports.ListAssignedBranchesResponse, error) {
+	return ports.ListAssignedBranchesResponse{}, nil
 }
 
 func TestManagerCannotCreateBranch(t *testing.T) {
@@ -116,6 +121,32 @@ func TestManagerCannotCreateUser(t *testing.T) {
 	app := NewRouter(authServiceStub{role: domain.RoleManager, businessID: "business-1"}, branchClientStub{}, identityClientStubForHTTP{})
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/users", bytes.NewReader([]byte(`{"email":"staff@example.test","password":"secret123","full_name":"Staff","role":"Staff"}`)))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer token")
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d", resp.StatusCode)
+	}
+}
+
+func TestManagerCanReadAssignedBranch(t *testing.T) {
+	app := NewRouter(authServiceStub{role: domain.RoleManager, businessID: "business-1", assignedBranchIDs: []string{"branch-1"}}, branchClientStub{})
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/branches/branch-1", nil)
+	req.Header.Set("Authorization", "Bearer token")
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+}
+
+func TestManagerCannotReadUnassignedBranch(t *testing.T) {
+	app := NewRouter(authServiceStub{role: domain.RoleManager, businessID: "business-1", assignedBranchIDs: []string{"branch-1"}}, branchClientStub{})
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/branches/branch-2", nil)
 	req.Header.Set("Authorization", "Bearer token")
 	resp, err := app.Test(req)
 	if err != nil {
