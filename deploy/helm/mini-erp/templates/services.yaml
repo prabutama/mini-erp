@@ -1,3 +1,19 @@
+{{- if .Values.web.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  labels:
+    {{- include "mini-erp.labels" . | nindent 4 }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.web.port }}
+      targetPort: {{ .Values.web.port }}
+  selector:
+    app.kubernetes.io/component: web
+---
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:

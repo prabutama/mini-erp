@@ -24,6 +24,12 @@ jwt:
 apiGateway:
   nodePort: 30080
 
+web:
+  enabled: true
+  repository: mini-erp-web
+  imagePullPolicy: Always
+  port: 3000
+
 services:
   apiGateway:
     repository: mini-erp-api-gateway

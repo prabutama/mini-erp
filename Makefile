@@ -2,7 +2,7 @@ IMAGE_REGISTRY ?= ghcr.io
 IMAGE_OWNER ?= your-ghcr-owner
 IMAGE_TAG ?= dev
 
-.PHONY: help build test tidy clean docker-build docker-push postgres-up postgres-down postgres-logs migrate-identity-up migrate-organization-up migrate-operations-up migrate-resource-up migrate-reporting-up run-identity run-organization run-operations run-resource run-reporting run-api-gateway
+.PHONY: help build test tidy clean docker-build docker-push docker-build-web docker-push-web postgres-up postgres-down postgres-logs migrate-identity-up migrate-organization-up migrate-operations-up migrate-resource-up migrate-reporting-up run-identity run-organization run-operations run-resource run-reporting run-api-gateway
 
 help:
 	@echo "make build  - build all Go services"
@@ -11,6 +11,8 @@ help:
 	@echo "make clean  - remove local build output directory"
 	@echo "make docker-build - build all service images"
 	@echo "make docker-push  - push all service images"
+	@echo "make docker-build-web - build frontend web image"
+	@echo "make docker-push-web  - push frontend web image"
 	@echo "make postgres-up   - start local PostgreSQL"
 	@echo "make postgres-down - stop local PostgreSQL"
 	@echo "make run-identity     - run Identity gRPC service"
@@ -54,6 +56,10 @@ docker-build:
 	docker build -f deploy/docker/go-service.Dockerfile --build-arg SERVICE=operations -t $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-operations:$(IMAGE_TAG) .
 	docker build -f deploy/docker/go-service.Dockerfile --build-arg SERVICE=resource -t $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-resource:$(IMAGE_TAG) .
 	docker build -f deploy/docker/go-service.Dockerfile --build-arg SERVICE=reporting -t $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-reporting:$(IMAGE_TAG) .
+	docker build -f deploy/docker/web.Dockerfile -t $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-web:$(IMAGE_TAG) .
+
+docker-build-web:
+	docker build -f deploy/docker/web.Dockerfile -t $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-web:$(IMAGE_TAG) .
 
 docker-push:
 	docker push $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-api-gateway:$(IMAGE_TAG)
@@ -62,6 +68,10 @@ docker-push:
 	docker push $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-operations:$(IMAGE_TAG)
 	docker push $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-resource:$(IMAGE_TAG)
 	docker push $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-reporting:$(IMAGE_TAG)
+	docker push $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-web:$(IMAGE_TAG)
+
+docker-push-web:
+	docker push $(IMAGE_REGISTRY)/$(IMAGE_OWNER)/mini-erp-web:$(IMAGE_TAG)
 
 postgres-up:
 	docker compose up -d postgres

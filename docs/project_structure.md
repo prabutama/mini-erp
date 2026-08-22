@@ -26,7 +26,7 @@ service-erp/
 ├── .drone.yml
 │
 ├── apps/
-│   └── web/                    # Next.js frontend
+│   └── web/                    # TanStack frontend
 │
 ├── services/
 │   ├── api-gateway/
@@ -75,7 +75,8 @@ service-erp/
     ├── rest_api_contract.md
     ├── internal_grpc_contracts.md
     ├── nats_jetstream_event_contracts.md
-    └── design-cal.md
+    ├── design-cal.md
+    └── frontend_tanstack_plan.md
 ```
 
 Each Go service can use:

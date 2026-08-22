@@ -14,7 +14,11 @@
 - API Gateway also has branch, tenant-user, operations, resource, and reporting routes wired to internal gRPC when service addresses are set.
 - API Gateway now includes planned Platform Admin tenant oversight routes, current business routes, fixed role catalog, and business-scoped workflow routes.
 - Protobuf generation is not wired yet because local `protoc` tooling is not installed; current gRPC implementation uses a temporary JSON codec while `.proto` files remain the contract source.
-- Treat `docs/project_structure.md` as target structure; frontend and deploy packaging are still planned.
+- Treat `docs/project_structure.md` as target structure; frontend is planned as a TanStack app in `apps/web` and deploy packaging is still planned.
+- Frontend implementation plan lives in `docs/frontend_tanstack_plan.md` and must follow `docs/design-cal.md`.
+- Frontend app now exists under `apps/web` using TanStack Start, TanStack Router, TanStack Query, TanStack Table dependency, TypeScript, and Tailwind. Root web scripts use npm workspaces because local Corepack could not activate pnpm without elevated permission.
+- Frontend currently has MVP routes for signup, login, dashboard, branches, users/access, workflows, service definitions, service orders, resources, reports, and Platform Admin tenant oversight. Branches and core MVP screens call the API Gateway `/api/v1/*` endpoints with in-memory bearer token auth for the first pass.
+- Frontend auth still needs production hardening with TanStack Start server functions and HTTP-only cookies. Direct browser API calls may need API Gateway CORS configuration when `VITE_API_BASE_URL` points to a different origin.
 - Reporting Phase 1 stores audit events and operations summary snapshots in `reporting_db`; data ingestion is manual/internal for now. NATS consumers are not implemented yet.
 - Operations workflow endpoints persist workflow definitions, statuses, and transitions. Service order transitions still use the current fixed MVP transition rules until workflow-driven order execution is wired.
 - Do not create services, endpoints, databases, or infrastructure outside the documented service boundaries without updating docs first.
@@ -29,6 +33,9 @@ gofmt -w "services/organization" "services/api-gateway"
 gofmt -w "services/operations" "services/api-gateway"
 make build
 make test
+npm install
+npm run web:lint
+npm run web:build
 ```
 
 ```powershell

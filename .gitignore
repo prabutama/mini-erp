@@ -6,3 +6,5 @@ coverage/
 tmp/
 .env
 .env.*
+!.env.example
+!apps/**/.env.example

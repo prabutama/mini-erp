@@ -1,6 +1,6 @@
 ## Brief
 
-- Frontend target: Next.js, TypeScript, Tailwind.
+- Frontend target: TanStack Start, TanStack Router, TanStack Query, TanStack Table, TypeScript, and Tailwind.
 - Backend target: Go API Gateway and Go microservices.
 - Internal transport: gRPC/protobuf contracts, currently JSON codec implementation until tooling exists.
 - Database: PostgreSQL per service.
@@ -18,7 +18,7 @@ helm version
 
 | Area                   | Technology                                             |
 | ---------------------- | ------------------------------------------------------ |
-| Frontend               | Next.js, TypeScript, Tailwind CSS                      |
+| Frontend               | TanStack Start, TanStack Router, TanStack Query, TanStack Table, TypeScript, Tailwind CSS |
 | API Gateway            | Go, REST API                                           |
 | Microservices          | Go                                                     |
 | Internal communication | gRPC + Protocol Buffers                                |
