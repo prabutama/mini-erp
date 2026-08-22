@@ -131,26 +131,68 @@ type ListServiceOrderAssignmentsResponse struct {
 	Assignments []ServiceOrderAssignmentResponse `json:"assignments"`
 }
 
-type CreateWorkflowRequest struct{ BusinessID, Name, Description string }
-type UpdateWorkflowRequest struct{ WorkflowID, BusinessID, Name, Description, Status string }
-type GetWorkflowRequest struct{ WorkflowID string }
-type ListWorkflowsRequest struct{ BusinessID string }
-type WorkflowResponse struct{ WorkflowID, BusinessID, Name, Description, Status string }
+type CreateWorkflowRequest struct {
+	BusinessID  string `json:"business_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+type UpdateWorkflowRequest struct {
+	WorkflowID  string `json:"workflow_id"`
+	BusinessID  string `json:"business_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+}
+type GetWorkflowRequest struct {
+	WorkflowID string `json:"workflow_id"`
+}
+type ListWorkflowsRequest struct {
+	BusinessID string `json:"business_id"`
+}
+type WorkflowResponse struct {
+	WorkflowID  string `json:"workflow_id"`
+	BusinessID  string `json:"business_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+}
 type ListWorkflowsResponse struct {
 	Workflows []WorkflowResponse `json:"workflows"`
 }
 type CreateWorkflowStatusRequest struct {
-	WorkflowID, BusinessID, Code, Name, Category string
-	SortOrder                                    int
-	IsInitial, IsTerminal                        bool
+	WorkflowID string `json:"workflow_id"`
+	BusinessID string `json:"business_id"`
+	Code       string `json:"code"`
+	Name       string `json:"name"`
+	Category   string `json:"category"`
+	SortOrder  int    `json:"sort_order"`
+	IsInitial  bool   `json:"is_initial"`
+	IsTerminal bool   `json:"is_terminal"`
 }
 type WorkflowStatusResponse struct {
-	WorkflowStatusID, WorkflowID, BusinessID, Code, Name, Category string
-	SortOrder                                                      int
-	IsInitial, IsTerminal                                          bool
+	WorkflowStatusID string `json:"workflow_status_id"`
+	WorkflowID       string `json:"workflow_id"`
+	BusinessID       string `json:"business_id"`
+	Code             string `json:"code"`
+	Name             string `json:"name"`
+	Category         string `json:"category"`
+	SortOrder        int    `json:"sort_order"`
+	IsInitial        bool   `json:"is_initial"`
+	IsTerminal       bool   `json:"is_terminal"`
 }
-type CreateWorkflowTransitionRequest struct{ WorkflowID, BusinessID, FromStatusCode, ToStatusCode string }
-type WorkflowTransitionResponse struct{ WorkflowTransitionID, WorkflowID, BusinessID, FromStatusCode, ToStatusCode string }
+type CreateWorkflowTransitionRequest struct {
+	WorkflowID     string `json:"workflow_id"`
+	BusinessID     string `json:"business_id"`
+	FromStatusCode string `json:"from_status_code"`
+	ToStatusCode   string `json:"to_status_code"`
+}
+type WorkflowTransitionResponse struct {
+	WorkflowTransitionID string `json:"workflow_transition_id"`
+	WorkflowID           string `json:"workflow_id"`
+	BusinessID           string `json:"business_id"`
+	FromStatusCode       string `json:"from_status_code"`
+	ToStatusCode         string `json:"to_status_code"`
+}
 
 type Server struct {
 	services  *application.ServiceDefinitionService

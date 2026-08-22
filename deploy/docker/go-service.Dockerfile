@@ -5,9 +5,8 @@ ARG SERVICE
 WORKDIR /src
 RUN apk add --no-cache git
 COPY go.work go.work.sum ./
-COPY services/${SERVICE}/go.mod services/${SERVICE}/go.sum ./services/${SERVICE}/
+COPY services ./services
 RUN cd services/${SERVICE} && go mod download
-COPY services/${SERVICE} ./services/${SERVICE}
 RUN cd services/${SERVICE} && CGO_ENABLED=0 GOOS=linux go build -o /out/app ./cmd/${SERVICE}
 
 FROM alpine:3.22 AS migrate

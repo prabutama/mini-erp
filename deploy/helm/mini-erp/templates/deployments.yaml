@@ -80,6 +80,11 @@ spec:
           ports:
             - containerPort: {{ $svc.grpcPort }}
           env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mini-erp.fullname" $root }}-secrets
+                  key: POSTGRES_PASSWORD
             - name: {{ upper $name }}_DATABASE_URL
               value: "postgres://{{ $root.Values.postgres.user }}:$(POSTGRES_PASSWORD)@postgres:5432/{{ $svc.database }}?sslmode=disable"
             - name: {{ upper $name }}_GRPC_ADDR
@@ -91,11 +96,6 @@ spec:
                   name: {{ include "mini-erp.fullname" $root }}-secrets
                   key: IDENTITY_JWT_SECRET
             {{- end }}
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "mini-erp.fullname" $root }}-secrets
-                  key: POSTGRES_PASSWORD
           readinessProbe:
             tcpSocket:
               port: {{ $svc.grpcPort }}

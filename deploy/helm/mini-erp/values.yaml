@@ -2,13 +2,14 @@ imagePullSecrets: []
 
 global:
   imageRegistry: ghcr.io
-  imageOwner: your-ghcr-owner
+  imageOwner: prabutama
   imageTag: dev
   imagePullPolicy: IfNotPresent
 
 postgres:
   storageClassName: local-path
   storageSize: 3Gi
+  externalNodePort: 30433
   user: mini_erp
   password: mini_erp
   database: postgres

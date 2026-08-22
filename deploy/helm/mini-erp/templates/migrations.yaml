@@ -9,9 +9,6 @@ metadata:
   labels:
     {{- include "mini-erp.labels" $root | nindent 4 }}
     app.kubernetes.io/component: migrate-{{ $name }}
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 3
   template:

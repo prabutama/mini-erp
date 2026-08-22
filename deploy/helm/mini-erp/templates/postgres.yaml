@@ -19,10 +19,12 @@ metadata:
   labels:
     {{- include "mini-erp.labels" . | nindent 4 }}
 spec:
+  type: NodePort
   ports:
     - name: postgres
       port: 5432
       targetPort: 5432
+      nodePort: {{ .Values.postgres.externalNodePort }}
   selector:
     app.kubernetes.io/component: postgres
 ---
