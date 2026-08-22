@@ -1,3 +1,23 @@
+## Brief
+
+- Identity owns auth, users, roles, permissions.
+- Organization owns businesses, branches, placements.
+- Operations owns service definitions, workflows, service orders, assignments.
+- Resource owns resources, stock, stock movements, resource usage.
+- Reporting owns audit events and report snapshots.
+- API Gateway owns external REST routing and access context extraction.
+
+## Useful Commands
+
+```powershell
+make run-identity
+make run-organization
+make run-operations
+make run-resource
+make run-reporting
+make run-api-gateway
+```
+
 | Service                  | Owns                                                                |
 | ------------------------ | ------------------------------------------------------------------- |
 | **Identity Service**     | Users, authentication, roles, permissions                           |

@@ -68,3 +68,27 @@ func (c *OrganizationClient) CreateBusiness(ctx context.Context, req ports.Creat
 	err := c.conn.Invoke(ctx, "/organization.v1.OrganizationService/CreateBusiness", req, &resp)
 	return resp, err
 }
+
+func (c *OrganizationClient) GetBusiness(ctx context.Context, req ports.GetBusinessRequest) (domain.BusinessResponse, error) {
+	var resp domain.BusinessResponse
+	err := c.conn.Invoke(ctx, "/organization.v1.OrganizationService/GetBusiness", req, &resp)
+	return resp, err
+}
+
+func (c *OrganizationClient) UpdateBusiness(ctx context.Context, req ports.UpdateBusinessRequest) (domain.BusinessResponse, error) {
+	var resp domain.BusinessResponse
+	err := c.conn.Invoke(ctx, "/organization.v1.OrganizationService/UpdateBusiness", req, &resp)
+	return resp, err
+}
+
+func (c *OrganizationClient) ListPlatformBusinesses(ctx context.Context, req ports.ListPlatformBusinessesRequest) (domain.ListBusinessesResponse, error) {
+	var resp domain.ListBusinessesResponse
+	err := c.conn.Invoke(ctx, "/organization.v1.OrganizationService/ListPlatformBusinesses", req, &resp)
+	return resp, err
+}
+
+func (c *OrganizationClient) UpdatePlatformBusiness(ctx context.Context, req ports.UpdatePlatformBusinessRequest) (domain.BusinessResponse, error) {
+	var resp domain.BusinessResponse
+	err := c.conn.Invoke(ctx, "/organization.v1.OrganizationService/UpdatePlatformBusiness", req, &resp)
+	return resp, err
+}

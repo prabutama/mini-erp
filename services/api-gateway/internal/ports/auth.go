@@ -16,6 +16,10 @@ type AuthService interface {
 
 type OrganizationClient interface {
 	CreateBusiness(ctx context.Context, req CreateBusinessRequest) (CreateBusinessResponse, error)
+	GetBusiness(ctx context.Context, req GetBusinessRequest) (domain.BusinessResponse, error)
+	UpdateBusiness(ctx context.Context, req UpdateBusinessRequest) (domain.BusinessResponse, error)
+	ListPlatformBusinesses(ctx context.Context, req ListPlatformBusinessesRequest) (domain.ListBusinessesResponse, error)
+	UpdatePlatformBusiness(ctx context.Context, req UpdatePlatformBusinessRequest) (domain.BusinessResponse, error)
 	ListAssignedBranches(ctx context.Context, req ListAssignedBranchesRequest) (ListAssignedBranchesResponse, error)
 }
 
@@ -36,12 +40,36 @@ type CreateBusinessRequest struct {
 }
 
 type CreateBusinessResponse struct {
+	BusinessID    string `json:"business_id"`
+	Name          string `json:"name"`
+	Code          string `json:"code"`
+	Status        string `json:"status"`
+	Plan          string `json:"plan"`
+	PlatformNotes string `json:"platform_notes"`
+	SuspendedAt   string `json:"suspended_at"`
+	Timezone      string `json:"timezone"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+}
+
+type GetBusinessRequest struct {
+	BusinessID string `json:"business_id"`
+}
+
+type ListPlatformBusinessesRequest struct{}
+
+type UpdateBusinessRequest struct {
 	BusinessID string `json:"business_id"`
 	Name       string `json:"name"`
-	Code       string `json:"code"`
-	Status     string `json:"status"`
-	Plan       string `json:"plan"`
 	Timezone   string `json:"timezone"`
+}
+
+type UpdatePlatformBusinessRequest struct {
+	BusinessID    string `json:"business_id"`
+	Status        string `json:"status"`
+	Plan          string `json:"plan"`
+	PlatformNotes string `json:"platform_notes"`
+	SuspendedAt   string `json:"suspended_at"`
 }
 
 type SignupTenantAdminRequest struct {

@@ -1,0 +1,51 @@
+{{- $root := . -}}
+{{- range $name, $svc := .Values.services }}
+{{- if ne $name "apiGateway" }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate-{{ $name }}
+  labels:
+    {{- include "mini-erp.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: migrate-{{ $name }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: migrate-{{ $name }}
+    spec:
+      restartPolicy: OnFailure
+      {{- with $root.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-postgres
+          image: postgres:16-alpine
+          command: ["sh", "-c", "until pg_isready -h postgres -U {{ $root.Values.postgres.user }} -d {{ $svc.database }}; do sleep 2; done"]
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mini-erp.fullname" $root }}-secrets
+                  key: POSTGRES_PASSWORD
+      containers:
+        - name: migrate
+          image: {{ include "mini-erp.image" (dict "root" $root "repository" $svc.repository) | quote }}
+          imagePullPolicy: {{ $root.Values.global.imagePullPolicy }}
+          command: ["sh", "-c"]
+          args:
+            - "/usr/local/bin/migrate -path /app/migrations -database \"postgres://{{ $root.Values.postgres.user }}:${POSTGRES_PASSWORD}@postgres:5432/{{ $svc.database }}?sslmode=disable\" up"
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mini-erp.fullname" $root }}-secrets
+                  key: POSTGRES_PASSWORD
+{{- end }}
+{{- end }}

@@ -1,10 +1,17 @@
 # Internal gRPC Contracts
 
+## Brief
+
+- Internal synchronous calls use gRPC between API Gateway and services.
+- Current implementation uses manually registered gRPC services with JSON codec until protobuf tooling exists.
+- `.proto` files remain the contract source.
+- Generated protobuf code should replace the temporary codec later.
+
 Planned synchronous gRPC skeleton only.
 
 Define concrete proto packages, messages, error contracts, and metadata under `proto/` before implementation.
 
-Current implementation note: until `protoc`, `protoc-gen-go`, and `protoc-gen-go-grpc` are installed and wired, Identity and Organization use manually registered gRPC services with a temporary JSON codec. `.proto` files remain the source of truth and generated protobuf code should replace this codec later.
+Current implementation note: until `protoc`, `protoc-gen-go`, and `protoc-gen-go-grpc` are installed and wired, services use manually registered gRPC with a temporary JSON codec. `.proto` files remain the source of truth and generated protobuf code should replace this codec later.
 
 ## Communication
 
@@ -152,11 +159,13 @@ GetResourceAvailability
 ### Reporting Service
 
 ```text
+RecordAuditEvent
 GetAuditEvents
+UpsertOperationsSummary
 GetOperationsSummary
 ```
 
-Reporting does not require `RecordAuditEvent` as an MVP RPC because audit and reporting data are primarily populated asynchronously through NATS JetStream events.
+Reporting Phase 1 stores reporting-owned audit events and operations summary snapshots. NATS JetStream ingestion remains planned later; current writes happen through internal RPCs only.
 
 ## Internal Metadata
 
@@ -184,3 +193,19 @@ Business-scoped calls carry `user_id`, `business_id`, role, permissions, `assign
 `ValidatePlatformAdmin` must not authorize business-scoped operations such as branch, staff, workflow, service order, resource, stock, or report management.
 
 `CreateBusiness` is valid only during `POST /api/v1/auth/signup` when invoked by API Gateway signup orchestration.
+
+## Useful Commands
+
+```powershell
+make run-identity
+make run-organization
+make run-operations
+make run-resource
+make run-reporting
+make run-api-gateway
+```
+
+```powershell
+make build
+make test
+```

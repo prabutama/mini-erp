@@ -35,14 +35,66 @@ func (r *BusinessRepository) Create(ctx context.Context, business domain.Busines
 func (r *BusinessRepository) FindByCode(ctx context.Context, code string) (domain.Business, error) {
 	var business domain.Business
 	err := r.db.QueryRow(ctx, `
-		SELECT id, name, code, status, plan, timezone, created_at
+		SELECT id, name, code, status, plan, COALESCE(platform_notes, ''), suspended_at, timezone, created_at, updated_at
 		FROM businesses
 		WHERE code = $1
-	`, strings.ToLower(code)).Scan(&business.ID, &business.Name, &business.Code, &business.Status, &business.Plan, &business.Timezone, &business.CreatedAt)
+	`, strings.ToLower(code)).Scan(&business.ID, &business.Name, &business.Code, &business.Status, &business.Plan, &business.PlatformNotes, &business.SuspendedAt, &business.Timezone, &business.CreatedAt, &business.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.Business{}, ErrNotFound
 	}
 	return business, err
+}
+
+func (r *BusinessRepository) FindByID(ctx context.Context, businessID string) (domain.Business, error) {
+	var business domain.Business
+	err := r.db.QueryRow(ctx, `
+		SELECT id, name, code, status, plan, COALESCE(platform_notes, ''), suspended_at, timezone, created_at, updated_at
+		FROM businesses
+		WHERE id = $1
+	`, businessID).Scan(&business.ID, &business.Name, &business.Code, &business.Status, &business.Plan, &business.PlatformNotes, &business.SuspendedAt, &business.Timezone, &business.CreatedAt, &business.UpdatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return domain.Business{}, ErrNotFound
+	}
+	return business, err
+}
+
+func (r *BusinessRepository) List(ctx context.Context) ([]domain.Business, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT id, name, code, status, plan, COALESCE(platform_notes, ''), suspended_at, timezone, created_at, updated_at
+		FROM businesses
+		ORDER BY created_at DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	businesses := []domain.Business{}
+	for rows.Next() {
+		var business domain.Business
+		if err := rows.Scan(&business.ID, &business.Name, &business.Code, &business.Status, &business.Plan, &business.PlatformNotes, &business.SuspendedAt, &business.Timezone, &business.CreatedAt, &business.UpdatedAt); err != nil {
+			return nil, err
+		}
+		businesses = append(businesses, business)
+	}
+	return businesses, rows.Err()
+}
+
+func (r *BusinessRepository) Update(ctx context.Context, business domain.Business) error {
+	_, err := r.db.Exec(ctx, `
+		UPDATE businesses
+		SET name = $2, timezone = $3, updated_at = now()
+		WHERE id = $1
+	`, business.ID, business.Name, business.Timezone)
+	return err
+}
+
+func (r *BusinessRepository) UpdatePlatform(ctx context.Context, business domain.Business) error {
+	_, err := r.db.Exec(ctx, `
+		UPDATE businesses
+		SET status = $2, plan = $3, platform_notes = $4, suspended_at = $5, updated_at = now()
+		WHERE id = $1
+	`, business.ID, business.Status, business.Plan, business.PlatformNotes, business.SuspendedAt)
+	return err
 }
 
 func isUniqueViolation(err error) bool {

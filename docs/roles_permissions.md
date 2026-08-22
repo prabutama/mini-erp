@@ -1,5 +1,19 @@
 # Roles And Permissions
 
+## Brief
+
+- MVP roles are fixed: `Platform Admin`, `Business Admin`, `Manager`, `Staff`.
+- No custom role creation exists in MVP.
+- Platform Admin is platform oversight-only.
+- Business Admin is tenant-wide.
+- Manager and Staff are branch-scoped.
+
+## Useful Commands
+
+```bash
+curl -i -H "Authorization: Bearer <access_token>" http://localhost:8080/api/v1/roles
+```
+
 MVP uses fixed roles only. Custom role creation is out of scope.
 
 ## Fixed Roles

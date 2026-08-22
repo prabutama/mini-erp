@@ -1,3 +1,21 @@
+## Brief
+
+- Frontend target: Next.js, TypeScript, Tailwind.
+- Backend target: Go API Gateway and Go microservices.
+- Internal transport: gRPC/protobuf contracts, currently JSON codec implementation until tooling exists.
+- Database: PostgreSQL per service.
+- Async: NATS JetStream.
+- Deployment: Docker images to GHCR, Helm chart to remote K3s.
+
+## Useful Commands
+
+```powershell
+go version
+docker version
+kubectl version
+helm version
+```
+
 | Area                   | Technology                                             |
 | ---------------------- | ------------------------------------------------------ |
 | Frontend               | Next.js, TypeScript, Tailwind CSS                      |

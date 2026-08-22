@@ -1,5 +1,13 @@
 # REST API Contract
 
+## Brief
+
+- All external requests go through API Gateway under `/api/v1/*`.
+- Planned MVP endpoint scope includes auth, platform tenant oversight, business/branch management, users, roles, workflows, service orders, resources, and reports.
+- `business_id` and role context are derived from authentication, not trusted from frontend bodies.
+- Manager and Staff branch scope must be enforced for branch-scoped data.
+- Platform Admin is oversight-only and cannot manage tenant operations.
+
 Planned REST skeleton only. This is not a complete OpenAPI contract until `contracts/openapi` exists.
 
 ## Rules
@@ -117,10 +125,8 @@ POST  /api/v1/users/{user_id}/placements
 Service orders are internal work orders only in MVP; no customer entity or customer endpoints are planned.
 
 ```text
-GET   /api/v1/services
-POST  /api/v1/services
-GET   /api/v1/services/{service_id}
-PATCH /api/v1/services/{service_id}
+GET   /api/v1/service-definitions
+POST  /api/v1/service-definitions
 
 GET   /api/v1/workflows
 POST  /api/v1/workflows
@@ -131,32 +137,45 @@ POST  /api/v1/workflows/{workflow_id}/statuses
 POST  /api/v1/workflows/{workflow_id}/transitions
 
 GET   /api/v1/service-orders
+GET   /api/v1/service-orders/summary
+GET   /api/v1/service-orders/mine
 POST  /api/v1/service-orders
 GET   /api/v1/service-orders/{order_id}
-PATCH /api/v1/service-orders/{order_id}
+GET   /api/v1/service-orders/{order_id}/assignments
 
 POST  /api/v1/service-orders/{order_id}/assign
 POST  /api/v1/service-orders/{order_id}/transition
 ```
+
+Phase 3A implements service definitions and basic service order create/list/get.
+Phase 3B adds fixed service order status transitions: `open` to `in_progress` or `cancelled`, and `in_progress` to `completed` or `cancelled`.
+Phase 3C adds one active assignment per service order through `POST /api/v1/service-orders/{order_id}/assign`.
+Phase 3D adds assigned-order reads through `GET /api/v1/service-orders/mine` and active assignment reads through `GET /api/v1/service-orders/{order_id}/assignments`.
+Phase 3E adds `status`, `branch_id`, and `assigned_user_id` filters on `GET /api/v1/service-orders`, plus status counts at `GET /api/v1/service-orders/summary`.
+Workflow endpoints are implemented as business-scoped configuration: workflows, statuses, and transitions. Service order status transition execution still uses the fixed MVP rules while workflow-driven order execution is wired next.
 
 ### Resources
 
 ```text
 GET   /api/v1/resources
 POST  /api/v1/resources
-GET   /api/v1/resources/{resource_id}
-PATCH /api/v1/resources/{resource_id}
+GET   /api/v1/resources/{resource_id}/availability
 
 POST /api/v1/resources/{resource_id}/stock-movements
 POST /api/v1/service-orders/{order_id}/resource-usage
 ```
 
+Resource phase 1 implements branch-scoped resource create/list, stock movements, and availability. Resource usage by service order remains next.
+Resource phase 2 implements service-order resource usage through `POST /api/v1/service-orders/{order_id}/resource-usage` and `GET /api/v1/service-orders/{order_id}/resource-usage`. Recording usage creates a stock-out movement.
+
 ### Reporting
 
 ```text
-GET /api/v1/reports/audit-events
-GET /api/v1/reports/operations-summary
+GET /api/v1/reports/audit-events?branch_id={branch_id}
+GET /api/v1/reports/operations-summary?date={yyyy-mm-dd}&branch_id={branch_id}
 ```
+
+Reporting Phase 1 reads from `reporting_db` only. It does not proxy live Operations data and does not consume NATS events yet. Business Admin can read tenant-wide reports. Manager can read only assigned branch reports; if multiple branches are assigned, `branch_id` is required. Staff and Platform Admin cannot access tenant reports.
 
 ## External Flow
 
@@ -166,4 +185,17 @@ Frontend
 API Gateway
    ↓ authenticated context
 Internal gRPC services
+```
+
+## Useful Commands
+
+```powershell
+make run-api-gateway
+```
+
+```bash
+curl -i http://localhost:8080/api/v1/me
+curl -i -H "Authorization: Bearer <access_token>" http://localhost:8080/api/v1/roles
+curl -i -H "Authorization: Bearer <access_token>" http://localhost:8080/api/v1/branches
+curl -i -H "Authorization: Bearer <access_token>" http://localhost:8080/api/v1/service-orders
 ```

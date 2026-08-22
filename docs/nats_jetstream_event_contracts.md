@@ -1,5 +1,24 @@
 # NATS JetStream Event Contracts
 
+## Brief
+
+- NATS JetStream is planned for async synchronization and Reporting projections.
+- Services will publish domain events after state changes.
+- Reporting will consume events to write audit events and report snapshots.
+- NATS deployment is not wired yet in local compose or Helm.
+
+## Useful Commands
+
+```bash
+kubectl -n mini-erp get pods | grep nats
+kubectl -n mini-erp logs statefulset/mini-erp-nats
+```
+
+```bash
+nats stream ls
+nats consumer ls <stream>
+```
+
 Planned NATS JetStream event skeleton only.
 
 Define concrete payload schemas under:

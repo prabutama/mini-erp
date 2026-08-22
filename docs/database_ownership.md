@@ -1,3 +1,20 @@
+## Brief
+
+- Every service owns one database.
+- Service schemas live under each service `migrations/` directory.
+- Other services may store UUID references only.
+- No cross-database foreign keys or joins are allowed.
+
+## Useful Commands
+
+```powershell
+make migrate-identity-up
+make migrate-organization-up
+make migrate-operations-up
+make migrate-resource-up
+make migrate-reporting-up
+```
+
 Each microservice owns its own database:
 Identity Service     → identity_db
 Organization Service → organization_db

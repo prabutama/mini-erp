@@ -1,0 +1,111 @@
+{{- $root := . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    {{- include "mini-erp.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: api-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: api-gateway
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: api-gateway
+          image: {{ include "mini-erp.image" (dict "root" . "repository" .Values.services.apiGateway.repository) | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: HTTP_PORT
+              value: "8080"
+            - name: IDENTITY_GRPC_ADDR
+              value: "identity:50051"
+            - name: ORGANIZATION_GRPC_ADDR
+              value: "organization:50052"
+            - name: OPERATIONS_GRPC_ADDR
+              value: "operations:50053"
+            - name: RESOURCE_GRPC_ADDR
+              value: "resource:50054"
+            - name: REPORTING_GRPC_ADDR
+              value: "reporting:50055"
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+{{- range $name, $svc := .Values.services }}
+{{- if ne $name "apiGateway" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "mini-erp.labels" $root | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ $name }}
+    spec:
+      {{- with $root.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: {{ include "mini-erp.image" (dict "root" $root "repository" $svc.repository) | quote }}
+          imagePullPolicy: {{ $root.Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ $svc.grpcPort }}
+          env:
+            - name: {{ upper $name }}_DATABASE_URL
+              value: "postgres://{{ $root.Values.postgres.user }}:$(POSTGRES_PASSWORD)@postgres:5432/{{ $svc.database }}?sslmode=disable"
+            - name: {{ upper $name }}_GRPC_ADDR
+              value: ":{{ $svc.grpcPort }}"
+            {{- if eq $name "identity" }}
+            - name: IDENTITY_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mini-erp.fullname" $root }}-secrets
+                  key: IDENTITY_JWT_SECRET
+            {{- end }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mini-erp.fullname" $root }}-secrets
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            tcpSocket:
+              port: {{ $svc.grpcPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: {{ $svc.grpcPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+{{- end }}
+{{- end }}

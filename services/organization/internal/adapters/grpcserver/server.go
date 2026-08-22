@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/isapr/mini-erp/services/organization/internal/application"
 	"github.com/isapr/mini-erp/services/organization/internal/domain"
@@ -21,12 +22,40 @@ type CreateBusinessRequest struct {
 }
 
 type CreateBusinessResponse struct {
+	BusinessID    string `json:"business_id"`
+	Name          string `json:"name"`
+	Code          string `json:"code"`
+	Status        string `json:"status"`
+	Plan          string `json:"plan"`
+	PlatformNotes string `json:"platform_notes"`
+	SuspendedAt   string `json:"suspended_at"`
+	Timezone      string `json:"timezone"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+}
+
+type GetBusinessRequest struct {
+	BusinessID string `json:"business_id"`
+}
+
+type ListPlatformBusinessesRequest struct{}
+
+type ListPlatformBusinessesResponse struct {
+	Businesses []CreateBusinessResponse `json:"businesses"`
+}
+
+type UpdateBusinessRequest struct {
 	BusinessID string `json:"business_id"`
 	Name       string `json:"name"`
-	Code       string `json:"code"`
-	Status     string `json:"status"`
-	Plan       string `json:"plan"`
 	Timezone   string `json:"timezone"`
+}
+
+type UpdatePlatformBusinessRequest struct {
+	BusinessID    string `json:"business_id"`
+	Status        string `json:"status"`
+	Plan          string `json:"plan"`
+	PlatformNotes string `json:"platform_notes"`
+	SuspendedAt   string `json:"suspended_at"`
 }
 
 type CreateBranchRequest struct {
@@ -102,6 +131,10 @@ type Server struct {
 
 type organizationServiceServer interface {
 	CreateBusiness(context.Context, CreateBusinessRequest) (CreateBusinessResponse, error)
+	GetBusiness(context.Context, GetBusinessRequest) (CreateBusinessResponse, error)
+	UpdateBusiness(context.Context, UpdateBusinessRequest) (CreateBusinessResponse, error)
+	ListPlatformBusinesses(context.Context, ListPlatformBusinessesRequest) (ListPlatformBusinessesResponse, error)
+	UpdatePlatformBusiness(context.Context, UpdatePlatformBusinessRequest) (CreateBusinessResponse, error)
 	CreateBranch(context.Context, CreateBranchRequest) (BranchResponse, error)
 	GetBranch(context.Context, GetBranchRequest) (BranchResponse, error)
 	ListBranches(context.Context, ListBranchesRequest) (ListBranchesResponse, error)
@@ -121,6 +154,10 @@ func (s *Server) Register(grpcServer *grpc.Server) {
 		HandlerType: (*organizationServiceServer)(nil),
 		Methods: []grpc.MethodDesc{
 			{MethodName: "CreateBusiness", Handler: createBusinessHandler},
+			{MethodName: "GetBusiness", Handler: getBusinessHandler},
+			{MethodName: "UpdateBusiness", Handler: updateBusinessHandler},
+			{MethodName: "ListPlatformBusinesses", Handler: listPlatformBusinessesHandler},
+			{MethodName: "UpdatePlatformBusiness", Handler: updatePlatformBusinessHandler},
 			{MethodName: "CreateBranch", Handler: createBranchHandler},
 			{MethodName: "GetBranch", Handler: getBranchHandler},
 			{MethodName: "ListBranches", Handler: listBranchesHandler},
@@ -137,6 +174,38 @@ func createBusinessHandler(srv any, ctx context.Context, dec func(any) error, _ 
 		return nil, err
 	}
 	return srv.(organizationServiceServer).CreateBusiness(ctx, req)
+}
+
+func getBusinessHandler(srv any, ctx context.Context, dec func(any) error, _ grpc.UnaryServerInterceptor) (any, error) {
+	var req GetBusinessRequest
+	if err := dec(&req); err != nil {
+		return nil, err
+	}
+	return srv.(organizationServiceServer).GetBusiness(ctx, req)
+}
+
+func updateBusinessHandler(srv any, ctx context.Context, dec func(any) error, _ grpc.UnaryServerInterceptor) (any, error) {
+	var req UpdateBusinessRequest
+	if err := dec(&req); err != nil {
+		return nil, err
+	}
+	return srv.(organizationServiceServer).UpdateBusiness(ctx, req)
+}
+
+func listPlatformBusinessesHandler(srv any, ctx context.Context, dec func(any) error, _ grpc.UnaryServerInterceptor) (any, error) {
+	var req ListPlatformBusinessesRequest
+	if err := dec(&req); err != nil {
+		return nil, err
+	}
+	return srv.(organizationServiceServer).ListPlatformBusinesses(ctx, req)
+}
+
+func updatePlatformBusinessHandler(srv any, ctx context.Context, dec func(any) error, _ grpc.UnaryServerInterceptor) (any, error) {
+	var req UpdatePlatformBusinessRequest
+	if err := dec(&req); err != nil {
+		return nil, err
+	}
+	return srv.(organizationServiceServer).UpdatePlatformBusiness(ctx, req)
 }
 
 func createBranchHandler(srv any, ctx context.Context, dec func(any) error, _ grpc.UnaryServerInterceptor) (any, error) {
@@ -201,14 +270,43 @@ func (s *Server) CreateBusiness(ctx context.Context, req CreateBusinessRequest) 
 
 	log.Printf("grpc service=organization method=CreateBusiness business_id=%s code=%s status=%s", business.ID, business.Code, business.Status)
 
-	return CreateBusinessResponse{
-		BusinessID: business.ID.String(),
-		Name:       business.Name,
-		Code:       business.Code,
-		Status:     business.Status,
-		Plan:       business.Plan,
-		Timezone:   business.Timezone,
-	}, nil
+	return businessResponse(business), nil
+}
+
+func (s *Server) GetBusiness(ctx context.Context, req GetBusinessRequest) (CreateBusinessResponse, error) {
+	business, err := s.businesses.GetBusiness(ctx, req.BusinessID)
+	if err != nil {
+		return CreateBusinessResponse{}, mapBusinessError(err)
+	}
+	return businessResponse(business), nil
+}
+
+func (s *Server) UpdateBusiness(ctx context.Context, req UpdateBusinessRequest) (CreateBusinessResponse, error) {
+	business, err := s.businesses.UpdateBusiness(ctx, application.UpdateBusinessInput{BusinessID: req.BusinessID, Name: req.Name, Timezone: req.Timezone})
+	if err != nil {
+		return CreateBusinessResponse{}, mapBusinessError(err)
+	}
+	return businessResponse(business), nil
+}
+
+func (s *Server) ListPlatformBusinesses(ctx context.Context, _ ListPlatformBusinessesRequest) (ListPlatformBusinessesResponse, error) {
+	businesses, err := s.businesses.ListPlatformBusinesses(ctx)
+	if err != nil {
+		return ListPlatformBusinessesResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	response := ListPlatformBusinessesResponse{Businesses: []CreateBusinessResponse{}}
+	for _, business := range businesses {
+		response.Businesses = append(response.Businesses, businessResponse(business))
+	}
+	return response, nil
+}
+
+func (s *Server) UpdatePlatformBusiness(ctx context.Context, req UpdatePlatformBusinessRequest) (CreateBusinessResponse, error) {
+	business, err := s.businesses.UpdatePlatformBusiness(ctx, application.UpdatePlatformBusinessInput{BusinessID: req.BusinessID, Status: req.Status, Plan: req.Plan, PlatformNotes: req.PlatformNotes, SuspendedAtRFC: req.SuspendedAt})
+	if err != nil {
+		return CreateBusinessResponse{}, mapBusinessError(err)
+	}
+	return businessResponse(business), nil
 }
 
 func (s *Server) CreateBranch(ctx context.Context, req CreateBranchRequest) (BranchResponse, error) {
@@ -284,4 +382,19 @@ func (s *Server) ListAssignedBranches(ctx context.Context, req ListAssignedBranc
 
 func branchResponse(branch domain.Branch) BranchResponse {
 	return BranchResponse{BranchID: branch.ID.String(), BusinessID: branch.BusinessID.String(), Name: branch.Name, Code: branch.Code, Address: branch.Address, Phone: branch.Phone, Status: branch.Status}
+}
+
+func businessResponse(business domain.Business) CreateBusinessResponse {
+	suspendedAt := ""
+	if business.SuspendedAt != nil {
+		suspendedAt = business.SuspendedAt.Format(time.RFC3339)
+	}
+	return CreateBusinessResponse{BusinessID: business.ID.String(), Name: business.Name, Code: business.Code, Status: business.Status, Plan: business.Plan, PlatformNotes: business.PlatformNotes, SuspendedAt: suspendedAt, Timezone: business.Timezone, CreatedAt: business.CreatedAt.Format(time.RFC3339), UpdatedAt: business.UpdatedAt.Format(time.RFC3339)}
+}
+
+func mapBusinessError(err error) error {
+	if errors.Is(err, application.ErrValidation) {
+		return status.Error(codes.InvalidArgument, "validation failed")
+	}
+	return status.Error(codes.Internal, err.Error())
 }

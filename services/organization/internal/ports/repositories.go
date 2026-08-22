@@ -8,7 +8,11 @@ import (
 
 type BusinessRepository interface {
 	Create(ctx context.Context, business domain.Business) error
+	FindByID(ctx context.Context, businessID string) (domain.Business, error)
 	FindByCode(ctx context.Context, code string) (domain.Business, error)
+	List(ctx context.Context) ([]domain.Business, error)
+	Update(ctx context.Context, business domain.Business) error
+	UpdatePlatform(ctx context.Context, business domain.Business) error
 }
 
 type BranchRepository interface {

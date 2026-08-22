@@ -6,46 +6,252 @@ option go_package = "github.com/isapr/mini-erp/proto/operations/v1;operationsv1"
 
 service OperationsService {
   rpc CreateServiceDefinition(CreateServiceDefinitionRequest) returns (CreateServiceDefinitionResponse);
+  rpc ListServiceDefinitions(ListServiceDefinitionsRequest) returns (ListServiceDefinitionsResponse);
   rpc UpdateServiceDefinition(UpdateServiceDefinitionRequest) returns (UpdateServiceDefinitionResponse);
   rpc GetServiceDefinition(GetServiceDefinitionRequest) returns (GetServiceDefinitionResponse);
   rpc ValidateServiceDefinition(ValidateServiceDefinitionRequest) returns (ValidateServiceDefinitionResponse);
   rpc CreateWorkflow(CreateWorkflowRequest) returns (CreateWorkflowResponse);
+  rpc ListWorkflows(ListWorkflowsRequest) returns (ListWorkflowsResponse);
   rpc UpdateWorkflow(UpdateWorkflowRequest) returns (UpdateWorkflowResponse);
   rpc GetWorkflow(GetWorkflowRequest) returns (GetWorkflowResponse);
-  rpc AddWorkflowStatus(AddWorkflowStatusRequest) returns (AddWorkflowStatusResponse);
-  rpc AddWorkflowTransition(AddWorkflowTransitionRequest) returns (AddWorkflowTransitionResponse);
+  rpc CreateWorkflowStatus(CreateWorkflowStatusRequest) returns (WorkflowStatusResponse);
+  rpc CreateWorkflowTransition(CreateWorkflowTransitionRequest) returns (WorkflowTransitionResponse);
   rpc CreateServiceOrder(CreateServiceOrderRequest) returns (CreateServiceOrderResponse);
+  rpc ListServiceOrders(ListServiceOrdersRequest) returns (ListServiceOrdersResponse);
+  rpc ServiceOrderSummary(ServiceOrderSummaryRequest) returns (ServiceOrderSummaryResponse);
   rpc GetServiceOrder(GetServiceOrderRequest) returns (GetServiceOrderResponse);
   rpc ValidateServiceOrder(ValidateServiceOrderRequest) returns (ValidateServiceOrderResponse);
   rpc AssignServiceOrder(AssignServiceOrderRequest) returns (AssignServiceOrderResponse);
+  rpc ListAssignedServiceOrders(ListAssignedServiceOrdersRequest) returns (ListAssignedServiceOrdersResponse);
+  rpc ListServiceOrderAssignments(ListServiceOrderAssignmentsRequest) returns (ListServiceOrderAssignmentsResponse);
   rpc TransitionServiceOrder(TransitionServiceOrderRequest) returns (TransitionServiceOrderResponse);
 }
 
-message CreateServiceDefinitionRequest {}
-message CreateServiceDefinitionResponse {}
+message CreateServiceDefinitionRequest {
+  string business_id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message CreateServiceDefinitionResponse {
+  string service_definition_id = 1;
+  string business_id = 2;
+  string name = 3;
+  string code = 4;
+  string description = 5;
+  string status = 6;
+}
+
+message ListServiceDefinitionsRequest {
+  string business_id = 1;
+}
+
+message ListServiceDefinitionsResponse {
+  repeated CreateServiceDefinitionResponse service_definitions = 1;
+}
 message UpdateServiceDefinitionRequest {}
 message UpdateServiceDefinitionResponse {}
 message GetServiceDefinitionRequest {}
 message GetServiceDefinitionResponse {}
 message ValidateServiceDefinitionRequest {}
 message ValidateServiceDefinitionResponse {}
-message CreateWorkflowRequest {}
-message CreateWorkflowResponse {}
-message UpdateWorkflowRequest {}
-message UpdateWorkflowResponse {}
-message GetWorkflowRequest {}
-message GetWorkflowResponse {}
-message AddWorkflowStatusRequest {}
-message AddWorkflowStatusResponse {}
-message AddWorkflowTransitionRequest {}
-message AddWorkflowTransitionResponse {}
-message CreateServiceOrderRequest {}
-message CreateServiceOrderResponse {}
-message GetServiceOrderRequest {}
-message GetServiceOrderResponse {}
+message CreateWorkflowRequest {
+  string business_id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message CreateWorkflowResponse {
+  string workflow_id = 1;
+  string business_id = 2;
+  string name = 3;
+  string description = 4;
+  string status = 5;
+}
+
+message ListWorkflowsRequest {
+  string business_id = 1;
+}
+
+message ListWorkflowsResponse {
+  repeated CreateWorkflowResponse workflows = 1;
+}
+
+message UpdateWorkflowRequest {
+  string workflow_id = 1;
+  string business_id = 2;
+  string name = 3;
+  string description = 4;
+  string status = 5;
+}
+
+message UpdateWorkflowResponse {
+  string workflow_id = 1;
+  string business_id = 2;
+  string name = 3;
+  string description = 4;
+  string status = 5;
+}
+
+message GetWorkflowRequest {
+  string workflow_id = 1;
+}
+
+message GetWorkflowResponse {
+  string workflow_id = 1;
+  string business_id = 2;
+  string name = 3;
+  string description = 4;
+  string status = 5;
+}
+
+message CreateWorkflowStatusRequest {
+  string workflow_id = 1;
+  string business_id = 2;
+  string code = 3;
+  string name = 4;
+  string category = 5;
+  int32 sort_order = 6;
+  bool is_initial = 7;
+  bool is_terminal = 8;
+}
+
+message WorkflowStatusResponse {
+  string workflow_status_id = 1;
+  string workflow_id = 2;
+  string business_id = 3;
+  string code = 4;
+  string name = 5;
+  string category = 6;
+  int32 sort_order = 7;
+  bool is_initial = 8;
+  bool is_terminal = 9;
+}
+
+message CreateWorkflowTransitionRequest {
+  string workflow_id = 1;
+  string business_id = 2;
+  string from_status_code = 3;
+  string to_status_code = 4;
+}
+
+message WorkflowTransitionResponse {
+  string workflow_transition_id = 1;
+  string workflow_id = 2;
+  string business_id = 3;
+  string from_status_code = 4;
+  string to_status_code = 5;
+}
+message CreateServiceOrderRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string service_definition_id = 3;
+  string title = 4;
+  string description = 5;
+  string priority = 6;
+}
+
+message CreateServiceOrderResponse {
+  string service_order_id = 1;
+  string business_id = 2;
+  string branch_id = 3;
+  string service_definition_id = 4;
+  string title = 5;
+  string description = 6;
+  string status = 7;
+  string priority = 8;
+}
+
+message ListServiceOrdersRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string status = 3;
+  string assigned_user_id = 4;
+}
+
+message ListServiceOrdersResponse {
+  repeated CreateServiceOrderResponse service_orders = 1;
+}
+
+message ServiceOrderSummaryRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string assigned_user_id = 3;
+}
+
+message ServiceOrderSummaryResponse {
+  int32 total = 1;
+  int32 open = 2;
+  int32 in_progress = 3;
+  int32 completed = 4;
+  int32 cancelled = 5;
+}
+message GetServiceOrderRequest {
+  string service_order_id = 1;
+}
+
+message GetServiceOrderResponse {
+  string service_order_id = 1;
+  string business_id = 2;
+  string branch_id = 3;
+  string service_definition_id = 4;
+  string title = 5;
+  string description = 6;
+  string status = 7;
+  string priority = 8;
+}
 message ValidateServiceOrderRequest {}
 message ValidateServiceOrderResponse {}
-message AssignServiceOrderRequest {}
-message AssignServiceOrderResponse {}
-message TransitionServiceOrderRequest {}
-message TransitionServiceOrderResponse {}
+message AssignServiceOrderRequest {
+  string service_order_id = 1;
+  string business_id = 2;
+  string assigned_user_id = 3;
+  string assigned_by_user_id = 4;
+  string request_id = 5;
+}
+
+message AssignServiceOrderResponse {
+  string assignment_id = 1;
+  string service_order_id = 2;
+  string business_id = 3;
+  string branch_id = 4;
+  string assigned_user_id = 5;
+  string assigned_by_user_id = 6;
+  string status = 7;
+}
+
+message ListAssignedServiceOrdersRequest {
+  string business_id = 1;
+  string assigned_user_id = 2;
+  string branch_id = 3;
+}
+
+message ListAssignedServiceOrdersResponse {
+  repeated CreateServiceOrderResponse service_orders = 1;
+}
+
+message ListServiceOrderAssignmentsRequest {
+  string service_order_id = 1;
+}
+
+message ListServiceOrderAssignmentsResponse {
+  repeated AssignServiceOrderResponse assignments = 1;
+}
+message TransitionServiceOrderRequest {
+  string service_order_id = 1;
+  string business_id = 2;
+  string status = 3;
+  string changed_by_user_id = 4;
+  string request_id = 5;
+}
+
+message TransitionServiceOrderResponse {
+  string service_order_id = 1;
+  string business_id = 2;
+  string branch_id = 3;
+  string service_definition_id = 4;
+  string title = 5;
+  string description = 6;
+  string status = 7;
+  string priority = 8;
+}

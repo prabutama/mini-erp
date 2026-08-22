@@ -1,0 +1,53 @@
+imagePullSecrets: []
+
+global:
+  imageRegistry: ghcr.io
+  imageOwner: your-ghcr-owner
+  imageTag: dev
+  imagePullPolicy: IfNotPresent
+
+postgres:
+  storageClassName: local-path
+  storageSize: 3Gi
+  user: mini_erp
+  password: mini_erp
+  database: postgres
+
+nats:
+  storageClassName: local-path
+  storageSize: 1Gi
+
+jwt:
+  secret: change-me
+
+apiGateway:
+  nodePort: 30080
+
+services:
+  apiGateway:
+    repository: mini-erp-api-gateway
+    port: 8080
+  identity:
+    repository: mini-erp-identity
+    grpcPort: 50051
+    database: identity_db
+  organization:
+    repository: mini-erp-organization
+    grpcPort: 50052
+    database: organization_db
+  operations:
+    repository: mini-erp-operations
+    grpcPort: 50053
+    database: operations_db
+  resource:
+    repository: mini-erp-resource
+    grpcPort: 50054
+    database: resource_db
+  reporting:
+    repository: mini-erp-reporting
+    grpcPort: 50055
+    database: reporting_db
+
+ingress:
+  enabled: false
+  host: mini-erp.example.com

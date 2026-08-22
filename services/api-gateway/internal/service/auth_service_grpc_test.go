@@ -25,6 +25,22 @@ func (s *organizationClientStub) ListAssignedBranches(_ context.Context, req por
 	return ports.ListAssignedBranchesResponse{BranchIDs: s.branchIDs}, nil
 }
 
+func (s *organizationClientStub) GetBusiness(context.Context, ports.GetBusinessRequest) (domain.BusinessResponse, error) {
+	return domain.BusinessResponse{}, nil
+}
+
+func (s *organizationClientStub) UpdateBusiness(context.Context, ports.UpdateBusinessRequest) (domain.BusinessResponse, error) {
+	return domain.BusinessResponse{}, nil
+}
+
+func (s *organizationClientStub) ListPlatformBusinesses(context.Context, ports.ListPlatformBusinessesRequest) (domain.ListBusinessesResponse, error) {
+	return domain.ListBusinessesResponse{}, nil
+}
+
+func (s *organizationClientStub) UpdatePlatformBusiness(context.Context, ports.UpdatePlatformBusinessRequest) (domain.BusinessResponse, error) {
+	return domain.BusinessResponse{}, nil
+}
+
 type identityClientStub struct {
 	req        ports.SignupTenantAdminRequest
 	accessResp ports.AuthContextResponse

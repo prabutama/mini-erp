@@ -1,5 +1,19 @@
 # Source Of Truth
 
+## Brief
+
+- Each business concept has one owning service.
+- Cross-service data is referenced by UUID.
+- Cached or projected data must document its event source.
+- Reporting stores read models, not source-of-truth operational data.
+
+## Useful Commands
+
+```powershell
+make build
+make test
+```
+
 | Data | Owning Service | Notes |
 | --- | --- | --- |
 | Tenant signup orchestration | API Gateway | Only public signup creates businesses and first business admins in MVP. |

@@ -8,6 +8,8 @@ service OrganizationService {
   rpc CreateBusiness(CreateBusinessRequest) returns (CreateBusinessResponse);
   rpc GetBusiness(GetBusinessRequest) returns (GetBusinessResponse);
   rpc UpdateBusiness(UpdateBusinessRequest) returns (UpdateBusinessResponse);
+  rpc ListPlatformBusinesses(ListPlatformBusinessesRequest) returns (ListPlatformBusinessesResponse);
+  rpc UpdatePlatformBusiness(UpdatePlatformBusinessRequest) returns (UpdateBusinessResponse);
   rpc CreateBranch(CreateBranchRequest) returns (CreateBranchResponse);
   rpc GetBranch(GetBranchRequest) returns (GetBranchResponse);
   rpc ListBranches(ListBranchesRequest) returns (ListBranchesResponse);
@@ -30,12 +32,62 @@ message CreateBusinessResponse {
   string code = 3;
   string status = 4;
   string plan = 5;
-  string timezone = 6;
+  string platform_notes = 6;
+  string suspended_at = 7;
+  string timezone = 8;
+  string created_at = 9;
+  string updated_at = 10;
 }
-message GetBusinessRequest {}
-message GetBusinessResponse {}
-message UpdateBusinessRequest {}
-message UpdateBusinessResponse {}
+
+message GetBusinessRequest {
+  string business_id = 1;
+}
+
+message GetBusinessResponse {
+  string business_id = 1;
+  string name = 2;
+  string code = 3;
+  string status = 4;
+  string plan = 5;
+  string platform_notes = 6;
+  string suspended_at = 7;
+  string timezone = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message UpdateBusinessRequest {
+  string business_id = 1;
+  string name = 2;
+  string timezone = 3;
+}
+
+message UpdateBusinessResponse {
+  string business_id = 1;
+  string name = 2;
+  string code = 3;
+  string status = 4;
+  string plan = 5;
+  string platform_notes = 6;
+  string suspended_at = 7;
+  string timezone = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message ListPlatformBusinessesRequest {}
+
+message ListPlatformBusinessesResponse {
+  repeated GetBusinessResponse businesses = 1;
+}
+
+message UpdatePlatformBusinessRequest {
+  string business_id = 1;
+  string status = 2;
+  string plan = 3;
+  string platform_notes = 4;
+  string suspended_at = 5;
+}
 message CreateBranchRequest {}
 message CreateBranchResponse {}
 message GetBranchRequest {}

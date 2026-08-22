@@ -1,5 +1,24 @@
 # MVP Scope
 
+## Brief
+
+- MVP is a multi-tenant ERP for service-business internal operations.
+- Public signup creates one business and first Business Admin, but no branch.
+- MVP includes auth, branches, users, fixed roles, workflows, service orders, resources, and reporting.
+- Completion requires two-tenant isolation, branch-scoped Manager/Staff access, and K3s deployment validation.
+
+## Useful Commands
+
+```powershell
+make build
+make test
+```
+
+```bash
+kubectl -n mini-erp get pods
+kubectl -n mini-erp get svc
+```
+
 Build a lightweight multi-tenant ERP for the internal operations of service-based businesses.
 
 ## In Scope First

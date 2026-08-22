@@ -1,5 +1,23 @@
 Authentication and access context
 
+## Brief
+
+- API Gateway derives authenticated context after login.
+- Business-scoped users carry `business_id` and assigned branch IDs.
+- Frontend-provided `business_id` and `branch_id` are never trusted for access decisions.
+- Platform Admin cannot access tenant operation routes.
+- Managers and Staff can access only assigned branches.
+
+## Useful Commands
+
+```bash
+curl -i -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"<email>","password":"<password>"}'
+
+curl -i -H "Authorization: Bearer <access_token>" http://localhost:8080/api/v1/me
+```
+
 After login, the system resolves:
 user_id
 role and permissions

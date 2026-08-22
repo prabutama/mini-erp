@@ -1,3 +1,19 @@
+## Brief
+
+- `services/` contains Go services.
+- `proto/` contains internal gRPC contracts.
+- `contracts/openapi/` contains external REST contract.
+- `contracts/events/` contains async event contracts.
+- `deploy/` contains local and future K3s deployment assets.
+- `docs/` contains architectural and implementation rules.
+
+## Useful Commands
+
+```powershell
+make build
+make test
+```
+
 Target repository structure. Current repository may contain docs only; see `docs/current_state.md` before creating code.
 
 ```text

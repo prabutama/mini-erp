@@ -6,25 +6,108 @@ option go_package = "github.com/isapr/mini-erp/proto/resource/v1;resourcev1";
 
 service ResourceService {
   rpc CreateResource(CreateResourceRequest) returns (CreateResourceResponse);
+  rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse);
   rpc UpdateResource(UpdateResourceRequest) returns (UpdateResourceResponse);
   rpc GetResource(GetResourceRequest) returns (GetResourceResponse);
   rpc ValidateResource(ValidateResourceRequest) returns (ValidateResourceResponse);
   rpc RecordStockMovement(RecordStockMovementRequest) returns (RecordStockMovementResponse);
   rpc RecordResourceUsage(RecordResourceUsageRequest) returns (RecordResourceUsageResponse);
+  rpc ListResourceUsage(ListResourceUsageRequest) returns (ListResourceUsageResponse);
   rpc GetResourceAvailability(GetResourceAvailabilityRequest) returns (GetResourceAvailabilityResponse);
 }
 
-message CreateResourceRequest {}
-message CreateResourceResponse {}
+message CreateResourceRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string name = 3;
+  string unit = 4;
+  string type = 5;
+}
+
+message CreateResourceResponse {
+  string resource_id = 1;
+  string business_id = 2;
+  string branch_id = 3;
+  string name = 4;
+  string code = 5;
+  string unit = 6;
+  string type = 7;
+  string status = 8;
+}
+
+message ListResourcesRequest {
+  string business_id = 1;
+  string branch_id = 2;
+}
+
+message ListResourcesResponse {
+  repeated CreateResourceResponse resources = 1;
+}
 message UpdateResourceRequest {}
 message UpdateResourceResponse {}
-message GetResourceRequest {}
-message GetResourceResponse {}
+message GetResourceRequest { string resource_id = 1; }
+message GetResourceResponse {
+  string resource_id = 1;
+  string business_id = 2;
+  string branch_id = 3;
+  string name = 4;
+  string code = 5;
+  string unit = 6;
+  string type = 7;
+  string status = 8;
+}
 message ValidateResourceRequest {}
 message ValidateResourceResponse {}
-message RecordStockMovementRequest {}
-message RecordStockMovementResponse {}
-message RecordResourceUsageRequest {}
-message RecordResourceUsageResponse {}
-message GetResourceAvailabilityRequest {}
-message GetResourceAvailabilityResponse {}
+message RecordStockMovementRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string resource_id = 3;
+  string movement_type = 4;
+  double quantity = 5;
+  string reason = 6;
+  string service_order_id = 7;
+  string actor_user_id = 8;
+  string request_id = 9;
+}
+
+message RecordStockMovementResponse {
+  string stock_movement_id = 1;
+  string business_id = 2;
+  string branch_id = 3;
+  string resource_id = 4;
+  string movement_type = 5;
+  double quantity = 6;
+  string reason = 7;
+  string service_order_id = 8;
+  string actor_user_id = 9;
+}
+message RecordResourceUsageRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string service_order_id = 3;
+  string resource_id = 4;
+  double quantity = 5;
+  string reason = 6;
+  string recorded_by_user_id = 7;
+  string request_id = 8;
+}
+
+message RecordResourceUsageResponse {
+  string resource_usage_id = 1;
+  string business_id = 2;
+  string branch_id = 3;
+  string service_order_id = 4;
+  string resource_id = 5;
+  double quantity = 6;
+  string reason = 7;
+  string recorded_by_user_id = 8;
+  string stock_movement_id = 9;
+}
+
+message ListResourceUsageRequest { string service_order_id = 1; }
+message ListResourceUsageResponse { repeated RecordResourceUsageResponse usages = 1; }
+message GetResourceAvailabilityRequest { string resource_id = 1; }
+message GetResourceAvailabilityResponse {
+  string resource_id = 1;
+  double quantity = 2;
+}

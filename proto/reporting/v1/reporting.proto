@@ -5,11 +5,74 @@ package reporting.v1;
 option go_package = "github.com/isapr/mini-erp/proto/reporting/v1;reportingv1";
 
 service ReportingService {
+  rpc RecordAuditEvent(RecordAuditEventRequest) returns (AuditEvent);
   rpc GetAuditEvents(GetAuditEventsRequest) returns (GetAuditEventsResponse);
+  rpc UpsertOperationsSummary(UpsertOperationsSummaryRequest) returns (OperationsSummary);
   rpc GetOperationsSummary(GetOperationsSummaryRequest) returns (GetOperationsSummaryResponse);
 }
 
-message GetAuditEventsRequest {}
-message GetAuditEventsResponse {}
-message GetOperationsSummaryRequest {}
-message GetOperationsSummaryResponse {}
+message RecordAuditEventRequest {
+  string event_type = 1;
+  int32 event_version = 2;
+  string producer = 3;
+  string business_id = 4;
+  string branch_id = 5;
+  string actor_id = 6;
+  string request_id = 7;
+  string occurred_at = 8;
+  string data = 9;
+}
+
+message AuditEvent {
+  string event_id = 1;
+  string event_type = 2;
+  int32 event_version = 3;
+  string producer = 4;
+  string business_id = 5;
+  string branch_id = 6;
+  string actor_id = 7;
+  string request_id = 8;
+  string occurred_at = 9;
+  string data = 10;
+}
+
+message GetAuditEventsRequest {
+  string business_id = 1;
+  string branch_id = 2;
+}
+
+message GetAuditEventsResponse {
+  repeated AuditEvent events = 1;
+}
+
+message UpsertOperationsSummaryRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string snapshot_date = 3;
+  int32 open_orders = 4;
+  int32 in_progress_orders = 5;
+  int32 completed_orders = 6;
+  int32 cancelled_orders = 7;
+  double resources_used = 8;
+}
+
+message GetOperationsSummaryRequest {
+  string business_id = 1;
+  string branch_id = 2;
+  string snapshot_date = 3;
+}
+
+message GetOperationsSummaryResponse {
+  OperationsSummary summary = 1;
+}
+
+message OperationsSummary {
+  string business_id = 1;
+  string branch_id = 2;
+  string snapshot_date = 3;
+  int32 open_orders = 4;
+  int32 in_progress_orders = 5;
+  int32 completed_orders = 6;
+  int32 cancelled_orders = 7;
+  double resources_used = 8;
+}
