@@ -20,9 +20,10 @@ function SignupPage() {
     const form = new FormData(event.currentTarget)
     const user = await auth.signup({
       business_name: String(form.get('business_name') || ''),
-      admin_name: String(form.get('admin_name') || ''),
-      email: String(form.get('email') || ''),
-      password: String(form.get('password') || ''),
+      business_timezone: 'Asia/Jakarta',
+      admin_full_name: String(form.get('admin_name') || ''),
+      admin_email: String(form.get('email') || ''),
+      admin_password: String(form.get('password') || ''),
     }).catch((err: Error) => {
       setError(err.message)
       return null

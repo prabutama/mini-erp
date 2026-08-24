@@ -10,9 +10,10 @@ type LoginInput = {
 
 type SignupInput = {
   business_name: string
-  admin_name: string
-  email: string
-  password: string
+  business_timezone: string
+  admin_full_name: string
+  admin_email: string
+  admin_password: string
 }
 
 type AuthContextValue = {
