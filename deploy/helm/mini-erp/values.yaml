@@ -1,4 +1,5 @@
-imagePullSecrets: []
+imagePullSecrets: 
+- name: ghcr-creds
 
 global:
   imageRegistry: ghcr.io
@@ -56,5 +57,5 @@ services:
     database: reporting_db
 
 ingress:
-  enabled: false
-  host: mini-erp.example.com
+  enabled: true
+  host: mini-erp.prabutama.my.id

@@ -31,6 +31,8 @@ spec:
               value: {{ .Values.web.port | quote }}
             - name: NODE_ENV
               value: production
+            - name: TZ
+              value: "Asia/Jakarta"
           readinessProbe:
             httpGet:
               path: /
