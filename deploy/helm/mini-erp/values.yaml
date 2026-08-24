@@ -5,7 +5,7 @@ global:
   imageRegistry: ghcr.io
   imageOwner: prabutama
   imageTag: dev
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
   timezone: Asia/Jakarta
   natsURL: nats://nats:4222
 
