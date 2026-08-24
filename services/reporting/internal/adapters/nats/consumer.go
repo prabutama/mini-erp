@@ -30,7 +30,7 @@ func NewConsumer(ctx context.Context, url string, service *application.Reporting
 		conn.Close()
 		return nil, err
 	}
-	stream, err := js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{Name: streamName, Subjects: []string{"*.>"}})
+	stream, err := js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{Name: streamName, Subjects: []string{"service_order.*"}})
 	if err != nil {
 		conn.Close()
 		return nil, err

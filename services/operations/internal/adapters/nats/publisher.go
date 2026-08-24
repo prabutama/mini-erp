@@ -29,7 +29,7 @@ func NewPublisher(ctx context.Context, url string) (*Publisher, error) {
 		conn.Close()
 		return nil, err
 	}
-	if _, err := js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{Name: streamName, Subjects: []string{"*.>"}}); err != nil {
+	if _, err := js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{Name: streamName, Subjects: []string{"service_order.*"}}); err != nil {
 		conn.Close()
 		return nil, err
 	}

@@ -23,7 +23,7 @@ Current development slice uses one JetStream stream:
 
 ```text
 DOMAIN_EVENTS
-subjects: *.>
+subjects: service_order.*
 reporting durable consumer: reporting-audit
 reporting filter: service_order.*
 ```
