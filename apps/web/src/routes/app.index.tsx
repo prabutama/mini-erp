@@ -55,9 +55,9 @@ function DashboardPage() {
           </div>
         </Panel>
         <Card variant="dark">
-          <p className="text-sm font-medium text-on-dark-soft">MVP status</p>
-          <p className="mt-4 text-2xl font-semibold tracking-[-0.04em]">Backend contracts connected.</p>
-          <p className="mt-3 text-sm leading-6 text-on-dark-soft">Signup, branches, access, service orders, resources, NATS audit events, and reporting run through API Gateway.</p>
+          <p className="text-sm font-medium text-white">MVP status</p>
+          <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-white">Backend contracts connected.</p>
+          <p className="mt-3 text-sm leading-6 text-white">Signup, branches, access, service orders, resources, NATS audit events, and reporting run through API Gateway.</p>
         </Card>
       </div>
     </div>
