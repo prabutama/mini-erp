@@ -5,10 +5,14 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
+	operationsevents "github.com/isapr/mini-erp/services/operations/internal/adapters/events"
 	"github.com/isapr/mini-erp/services/operations/internal/adapters/grpcserver"
+	operationsnats "github.com/isapr/mini-erp/services/operations/internal/adapters/nats"
 	"github.com/isapr/mini-erp/services/operations/internal/adapters/postgres"
 	"github.com/isapr/mini-erp/services/operations/internal/application"
+	"github.com/isapr/mini-erp/services/operations/internal/ports"
 	"google.golang.org/grpc"
 )
 
@@ -30,11 +34,27 @@ func main() {
 	services := postgres.NewServiceDefinitionRepository(pool)
 	orders := postgres.NewServiceOrderRepository(pool)
 	workflows := postgres.NewWorkflowRepository(pool)
+	publisher := newPublisher()
 	grpcServer := grpc.NewServer()
-	grpcserver.New(application.NewServiceDefinitionService(services), application.NewServiceOrderService(orders, services), application.NewWorkflowService(workflows)).Register(grpcServer)
+	grpcserver.New(application.NewServiceDefinitionService(services), application.NewServiceOrderService(orders, services, publisher), application.NewWorkflowService(workflows)).Register(grpcServer)
 
 	log.Printf("operations gRPC listening on %s", addr)
 	log.Fatal(grpcServer.Serve(listener))
+}
+
+func newPublisher() ports.EventPublisher {
+	natsURL := os.Getenv("NATS_URL")
+	if natsURL == "" {
+		return operationsevents.NewNoopPublisher()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	publisher, err := operationsnats.NewPublisher(ctx, natsURL)
+	if err != nil {
+		log.Printf("NATS publisher disabled: %v", err)
+		return operationsevents.NewNoopPublisher()
+	}
+	return publisher
 }
 
 func env(key string, fallback string) string {

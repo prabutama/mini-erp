@@ -2,10 +2,10 @@
 
 ## Brief
 
-- NATS JetStream is planned for async synchronization and Reporting projections.
-- Services will publish domain events after state changes.
-- Reporting will consume events to write audit events and report snapshots.
-- NATS deployment is not wired yet in local compose or Helm.
+- NATS JetStream is used for async synchronization and Reporting projections.
+- Operations publishes service-order domain events after state changes when `NATS_URL` is configured.
+- Reporting consumes Operations service-order events to write audit events when `NATS_URL` is configured.
+- Local compose includes NATS JetStream; Helm already has a NATS release manifest.
 
 ## Useful Commands
 
@@ -19,15 +19,24 @@ nats stream ls
 nats consumer ls <stream>
 ```
 
-Planned NATS JetStream event skeleton only.
+Current development slice uses one JetStream stream:
 
-Define concrete payload schemas under:
+```text
+DOMAIN_EVENTS
+subjects: *.>
+reporting durable consumer: reporting-audit
+reporting filter: service_order.*
+```
+
+Concrete payload schemas live under:
 
 ```text
 contracts/events/
 ```
 
-before implementation.
+Operations service-order schemas in `contracts/events/operations.md` are implemented; remaining schemas are planned.
+
+Current MVP uses direct publish after database commit. Production needs transactional outbox before treating event delivery as guaranteed.
 
 ## Purpose
 

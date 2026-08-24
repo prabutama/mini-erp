@@ -5,7 +5,7 @@
 - Identity, Organization, Operations, Resource, Reporting, and API Gateway are active Go service areas.
 - API Gateway exposes planned MVP REST groups for auth, platform, businesses, branches, users, roles, workflows, service orders, resources, and reports.
 - Internal gRPC currently uses manually registered JSON codec services until protobuf generation tooling is installed.
-- Local PostgreSQL compose exists; full service compose, NATS ingestion, Dockerfiles, Helm chart, and remote K3s release are still pending.
+- Local PostgreSQL and NATS JetStream compose services exist; full service compose, remaining event publishers, and remote release updates are still pending.
 - Remote K3s server `isa@10.10.10.154` is reachable and already has K3s, `kubectl`, Docker, Traefik, and default `local-path` storage.
 
 - Repository currently contains planning documents, REST/event/proto contracts, Go services, a root `Makefile`, and local PostgreSQL compose setup.
@@ -19,7 +19,7 @@
 - Frontend app now exists under `apps/web` using TanStack Start, TanStack Router, TanStack Query, TanStack Table dependency, TypeScript, and Tailwind. Root web scripts use npm workspaces because local Corepack could not activate pnpm without elevated permission.
 - Frontend currently has MVP routes for signup, login, dashboard, branches, users/access, workflows, service definitions, service orders, resources, reports, and Platform Admin tenant oversight. Branches and core MVP screens call the API Gateway `/api/v1/*` endpoints with in-memory bearer token auth for the first pass.
 - Frontend auth still needs production hardening with TanStack Start server functions and HTTP-only cookies. Direct browser API calls may need API Gateway CORS configuration when `VITE_API_BASE_URL` points to a different origin.
-- Reporting Phase 1 stores audit events and operations summary snapshots in `reporting_db`; data ingestion is manual/internal for now. NATS consumers are not implemented yet.
+- Reporting Phase 1 stores audit events and operations summary snapshots in `reporting_db`; it now consumes Operations service-order NATS events into `audit_events` when `NATS_URL` is configured.
 - Operations workflow endpoints persist workflow definitions, statuses, and transitions. Service order transitions still use the current fixed MVP transition rules until workflow-driven order execution is wired.
 - Do not create services, endpoints, databases, or infrastructure outside the documented service boundaries without updating docs first.
 - Use existing `Makefile` targets before inventing new build, test, or migration commands.

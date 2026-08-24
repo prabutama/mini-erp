@@ -17,5 +17,16 @@ services:
       timeout: 5s
       retries: 10
 
+  nats:
+    image: nats:2.10-alpine
+    container_name: mini-erp-nats
+    command: ["-js", "-sd", "/data"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/data
+
 volumes:
   postgres_data:
+  nats_data:

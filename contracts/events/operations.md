@@ -1,6 +1,6 @@
 # Operations Events
 
-Events are planned contracts. NATS publishing is not wired in Phase 3A.
+Events are concrete contracts for the current Operations NATS slice. Operations publishes `service-order.created`, `service-order.assigned`, and `service-order.status-changed` to JetStream; other events remain planned until their owning code emits them.
 
 ## `service-definition.created`
 

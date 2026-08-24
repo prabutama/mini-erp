@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -72,6 +73,51 @@ func (s *ReportingService) RecordAuditEvent(ctx context.Context, input RecordAud
 		occurredAt = time.Now().UTC()
 	}
 	event := domain.AuditEvent{ID: uuid.New(), EventType: input.EventType, EventVersion: input.EventVersion, Producer: input.Producer, BusinessID: businessID, BranchID: branchID, ActorID: actorID, RequestID: input.RequestID, OccurredAt: occurredAt, Data: data}
+	if err := s.reports.RecordAuditEvent(ctx, event); err != nil {
+		return domain.AuditEvent{}, err
+	}
+	return event, nil
+}
+
+func (s *ReportingService) RecordDomainEvent(ctx context.Context, envelope domain.EventEnvelope) (domain.AuditEvent, error) {
+	eventID, err := uuid.Parse(envelope.EventID)
+	if err != nil {
+		return domain.AuditEvent{}, ErrValidation
+	}
+	businessID, err := uuid.Parse(envelope.BusinessID)
+	if err != nil {
+		return domain.AuditEvent{}, ErrValidation
+	}
+	branchID := uuid.Nil
+	if envelope.BranchID != "" {
+		branchID, err = uuid.Parse(envelope.BranchID)
+		if err != nil {
+			return domain.AuditEvent{}, ErrValidation
+		}
+	}
+	actorID := uuid.Nil
+	if envelope.ActorID != "" {
+		actorID, err = uuid.Parse(envelope.ActorID)
+		if err != nil {
+			return domain.AuditEvent{}, ErrValidation
+		}
+	}
+	if strings.TrimSpace(envelope.EventType) == "" || strings.TrimSpace(envelope.Producer) == "" || envelope.EventVersion <= 0 {
+		return domain.AuditEvent{}, ErrValidation
+	}
+	data := "{}"
+	if envelope.Data != nil {
+		encoded, err := json.Marshal(envelope.Data)
+		if err != nil {
+			return domain.AuditEvent{}, err
+		}
+		data = string(encoded)
+	}
+	occurredAt := envelope.OccurredAt
+	if occurredAt.IsZero() {
+		occurredAt = time.Now().UTC()
+	}
+	event := domain.AuditEvent{ID: eventID, EventType: envelope.EventType, EventVersion: envelope.EventVersion, Producer: envelope.Producer, BusinessID: businessID, BranchID: branchID, ActorID: actorID, RequestID: envelope.RequestID, OccurredAt: occurredAt, Data: data}
 	if err := s.reports.RecordAuditEvent(ctx, event); err != nil {
 		return domain.AuditEvent{}, err
 	}

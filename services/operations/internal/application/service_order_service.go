@@ -3,7 +3,9 @@ package application
 import (
 	"context"
 	"errors"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/isapr/mini-erp/services/operations/internal/domain"
@@ -52,12 +54,17 @@ type ServiceOrderSummaryInput struct {
 }
 
 type ServiceOrderService struct {
-	orders   ports.ServiceOrderRepository
-	services ports.ServiceDefinitionRepository
+	orders    ports.ServiceOrderRepository
+	services  ports.ServiceDefinitionRepository
+	publisher ports.EventPublisher
 }
 
-func NewServiceOrderService(orders ports.ServiceOrderRepository, services ports.ServiceDefinitionRepository) *ServiceOrderService {
-	return &ServiceOrderService{orders: orders, services: services}
+func NewServiceOrderService(orders ports.ServiceOrderRepository, services ports.ServiceDefinitionRepository, publisher ...ports.EventPublisher) *ServiceOrderService {
+	var eventPublisher ports.EventPublisher
+	if len(publisher) > 0 {
+		eventPublisher = publisher[0]
+	}
+	return &ServiceOrderService{orders: orders, services: services, publisher: eventPublisher}
 }
 
 func (s *ServiceOrderService) Create(ctx context.Context, input CreateServiceOrderInput) (domain.ServiceOrder, error) {
@@ -92,6 +99,7 @@ func (s *ServiceOrderService) Create(ctx context.Context, input CreateServiceOrd
 	if err := s.orders.Create(ctx, order); err != nil {
 		return domain.ServiceOrder{}, err
 	}
+	s.publish(ctx, domain.EventEnvelope{EventID: uuid.NewString(), EventType: "service-order.created", EventVersion: 1, OccurredAt: time.Now().UTC(), Producer: "operations-service", BusinessID: order.BusinessID.String(), BranchID: order.BranchID.String(), Data: map[string]any{"service_order_id": order.ID.String(), "service_definition_id": order.ServiceDefinitionID.String(), "title": order.Title, "status": order.Status, "priority": order.Priority}})
 	return order, nil
 }
 
@@ -166,6 +174,7 @@ func (s *ServiceOrderService) Transition(ctx context.Context, input TransitionSe
 	if err := s.orders.UpdateStatus(ctx, order, previousStatus, input.ChangedByUserID, input.RequestID); err != nil {
 		return domain.ServiceOrder{}, err
 	}
+	s.publish(ctx, domain.EventEnvelope{EventID: uuid.NewString(), EventType: "service-order.status-changed", EventVersion: 1, OccurredAt: time.Now().UTC(), Producer: "operations-service", BusinessID: order.BusinessID.String(), BranchID: order.BranchID.String(), ActorID: input.ChangedByUserID, RequestID: input.RequestID, Data: map[string]any{"service_order_id": order.ID.String(), "from_status": previousStatus, "to_status": order.Status}})
 	return order, nil
 }
 
@@ -202,7 +211,17 @@ func (s *ServiceOrderService) Assign(ctx context.Context, input AssignServiceOrd
 	if err := s.orders.Assign(ctx, assignment); err != nil {
 		return domain.ServiceOrderAssignment{}, err
 	}
+	s.publish(ctx, domain.EventEnvelope{EventID: uuid.NewString(), EventType: "service-order.assigned", EventVersion: 1, OccurredAt: time.Now().UTC(), Producer: "operations-service", BusinessID: assignment.BusinessID.String(), BranchID: assignment.BranchID.String(), ActorID: assignment.AssignedByUserID.String(), RequestID: assignment.RequestID, Data: map[string]any{"assignment_id": assignment.ID.String(), "service_order_id": assignment.ServiceOrderID.String(), "assigned_user_id": assignment.AssignedUserID.String(), "status": assignment.Status}})
 	return assignment, nil
+}
+
+func (s *ServiceOrderService) publish(ctx context.Context, event domain.EventEnvelope) {
+	if s.publisher == nil {
+		return
+	}
+	if err := s.publisher.Publish(ctx, event); err != nil {
+		log.Printf("publish %s failed: %v", event.EventType, err)
+	}
 }
 
 func (s *ServiceOrderService) ListAssignedToUser(ctx context.Context, businessID string, assignedUserID string, branchID string) ([]domain.ServiceOrder, error) {

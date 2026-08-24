@@ -17,6 +17,7 @@ func (r *ReportingRepository) RecordAuditEvent(ctx context.Context, event domain
 	_, err := r.db.Exec(ctx, `
 		INSERT INTO audit_events (id, event_type, event_version, producer, business_id, branch_id, actor_id, request_id, occurred_at, data)
 		VALUES ($1, $2, $3, $4, $5, NULLIF($6, '00000000-0000-0000-0000-000000000000')::uuid, NULLIF($7, '00000000-0000-0000-0000-000000000000')::uuid, $8, $9, $10::jsonb)
+		ON CONFLICT (id) DO NOTHING
 	`, event.ID, event.EventType, event.EventVersion, event.Producer, event.BusinessID, event.BranchID, event.ActorID, event.RequestID, event.OccurredAt, event.Data)
 	return err
 }
