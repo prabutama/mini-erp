@@ -32,7 +32,7 @@ spec:
             - name: NODE_ENV
               value: production
             - name: TZ
-              value: "Asia/Jakarta"
+              value: {{ .Values.global.timezone | quote }}
           readinessProbe:
             httpGet:
               path: /
@@ -76,6 +76,8 @@ spec:
           env:
             - name: HTTP_PORT
               value: "8080"
+            - name: TZ
+              value: {{ .Values.global.timezone | quote }}
             - name: IDENTITY_GRPC_ADDR
               value: "identity:50051"
             - name: ORGANIZATION_GRPC_ADDR
@@ -133,10 +135,16 @@ spec:
                 secretKeyRef:
                   name: {{ include "mini-erp.fullname" $root }}-secrets
                   key: POSTGRES_PASSWORD
+            - name: TZ
+              value: {{ $root.Values.global.timezone | quote }}
             - name: {{ upper $name }}_DATABASE_URL
               value: "postgres://{{ $root.Values.postgres.user }}:$(POSTGRES_PASSWORD)@postgres:5432/{{ $svc.database }}?sslmode=disable"
             - name: {{ upper $name }}_GRPC_ADDR
               value: ":{{ $svc.grpcPort }}"
+            {{- if $svc.natsEnabled }}
+            - name: NATS_URL
+              value: {{ $root.Values.global.natsURL | quote }}
+            {{- end }}
             {{- if eq $name "identity" }}
             - name: IDENTITY_JWT_SECRET
               valueFrom:

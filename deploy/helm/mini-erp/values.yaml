@@ -1,11 +1,13 @@
-imagePullSecrets: 
-- name: ghcr-creds
+imagePullSecrets:
+  - name: ghcr-creds
 
 global:
   imageRegistry: ghcr.io
   imageOwner: prabutama
   imageTag: dev
   imagePullPolicy: IfNotPresent
+  timezone: Asia/Jakarta
+  natsURL: nats://nats:4222
 
 postgres:
   storageClassName: local-path
@@ -47,6 +49,7 @@ services:
     repository: mini-erp-operations
     grpcPort: 50053
     database: operations_db
+    natsEnabled: true
   resource:
     repository: mini-erp-resource
     grpcPort: 50054
@@ -55,6 +58,7 @@ services:
     repository: mini-erp-reporting
     grpcPort: 50055
     database: reporting_db
+    natsEnabled: true
 
 ingress:
   enabled: true

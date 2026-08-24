@@ -31,6 +31,8 @@ spec:
                 secretKeyRef:
                   name: {{ include "mini-erp.fullname" $root }}-secrets
                   key: POSTGRES_PASSWORD
+            - name: TZ
+              value: {{ $root.Values.global.timezone | quote }}
       containers:
         - name: migrate
           image: {{ include "mini-erp.image" (dict "root" $root "repository" $svc.repository) | quote }}
@@ -44,5 +46,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "mini-erp.fullname" $root }}-secrets
                   key: POSTGRES_PASSWORD
+            - name: TZ
+              value: {{ $root.Values.global.timezone | quote }}
 {{- end }}
 {{- end }}
