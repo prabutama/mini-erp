@@ -18,7 +18,7 @@ RUN curl -fsSL "https://github.com/golang-migrate/migrate/releases/download/v4.1
 FROM alpine:3.22
 ARG SERVICE
 WORKDIR /app
-RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates
+RUN addgroup -S app && adduser -S app -G app && apk add --no-cache ca-certificates tzdata
 COPY --from=build /out/app /app/app
 COPY --from=migrate /usr/local/bin/migrate /usr/local/bin/migrate
 COPY services/${SERVICE}/migrations /app/migrations
